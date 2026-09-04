@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { retroSound } from '@/lib/sound';
 import { Question, Quiz } from '@/lib/seedData';
 import { RetroClockIcon, RetroFlameIcon } from '@/components/RetroIcons';
+import QuizLoading from './loading';
 
 interface AnswerLogItem {
   questionText: string;
@@ -16,7 +17,7 @@ interface AnswerLogItem {
   explanation: string;
 }
 
-export default function QuizPlayPage() {
+function QuizPlayContent() {
   const params = useParams();
   const searchParams = useSearchParams();
   const quizId = params?.id as string;
@@ -433,5 +434,13 @@ export default function QuizPlayPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function QuizPlayPage() {
+  return (
+    <Suspense fallback={<QuizLoading />}>
+      <QuizPlayContent />
+    </Suspense>
   );
 }
