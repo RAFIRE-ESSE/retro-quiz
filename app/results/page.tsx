@@ -1,16 +1,17 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import confetti from 'canvas-confetti';
 import { retroSound } from '@/lib/sound';
 import { RetroTrophyIcon, RetroFloppyIcon } from '@/components/RetroIcons';
 
 interface ResultsData {
-  quizId: number;
+  quizId: number | string;
   quizTitle: string;
   gamerTag: string;
   gameMode: string;
   score: number;
+  accuracy?: number;
   maxStreak: number;
   totalQuestions: number;
   totalTimeSpent: number;
@@ -30,6 +31,47 @@ export default function ResultsPage() {
   const [results, setResults] = useState<ResultsData | null>(null);
   const [filter, setFilter] = useState<'all' | 'correct' | 'incorrect'>('all');
   const [savedToDb, setSavedToDb] = useState<boolean | null>(null);
+  const [dbScoreId, setDbScoreId] = useState<number | null>(null);
+  const [dbErrorMessage, setDbErrorMessage] = useState<string | null>(null);
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  const saveScoreToDatabase = useCallback(async (data: ResultsData, accuracyVal: number) => {
+    setIsRetrying(true);
+    setDbErrorMessage(null);
+
+    try {
+      const res = await fetch('/api/scores', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          quizId: data.quizId,
+          quizTitle: data.quizTitle,
+          gamerTag: data.gamerTag,
+          score: data.score,
+          accuracy: accuracyVal,
+          maxStreak: data.maxStreak,
+          gameMode: data.gameMode,
+          timeSpentSeconds: data.totalTimeSpent
+        })
+      });
+
+      const responseData = await res.json();
+      if (res.ok && responseData?.success) {
+        setSavedToDb(true);
+        if (responseData.score?.id) {
+          setDbScoreId(responseData.score.id);
+        }
+      } else {
+        setSavedToDb(false);
+        setDbErrorMessage(responseData?.error || 'Microsoft SQL Server rejected the score entry.');
+      }
+    } catch (err: any) {
+      setSavedToDb(false);
+      setDbErrorMessage(err.message || 'Could not communicate with Microsoft SQL Server backend.');
+    } finally {
+      setIsRetrying(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -41,9 +83,11 @@ export default function ResultsPage() {
 
         const correctCount = parsed.answersLog.filter(a => a.isCorrect).length;
         const total = parsed.answersLog.length;
-        const accuracy = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+        const computedAccuracy = typeof parsed.accuracy === 'number'
+          ? parsed.accuracy
+          : (total > 0 ? Math.round((correctCount / total) * 100) : 0);
 
-        if (accuracy >= 60) {
+        if (computedAccuracy >= 50) {
           retroSound.playFanfare();
           confetti({
             particleCount: 120,
@@ -53,46 +97,28 @@ export default function ResultsPage() {
           });
         }
 
-        fetch('/api/scores', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            quizId: parsed.quizId,
-            quizTitle: parsed.quizTitle,
-            gamerTag: parsed.gamerTag,
-            score: parsed.score,
-            accuracy,
-            maxStreak: parsed.maxStreak,
-            gameMode: parsed.gameMode,
-            timeSpentSeconds: parsed.totalTimeSpent
-          })
-        })
-          .then(res => res.json())
-          .then(data => {
-            if (data?.success) setSavedToDb(true);
-            else setSavedToDb(false);
-          })
-          .catch(() => setSavedToDb(false));
-
+        saveScoreToDatabase(parsed, computedAccuracy);
       } catch (e) {
-        console.error('Error parsing results:', e);
+        console.error('Error parsing quiz results:', e);
       }
     }
-  }, []);
+  }, [saveScoreToDatabase]);
 
   if (!results) {
     return (
-      <div className="retro-card" style={{ padding: '3rem', textAlign: 'center' }}>
-        <h2 style={{ color: 'var(--color-plum)', marginBottom: '1rem' }}>No Active Results</h2>
-        <p style={{ marginBottom: '1.5rem' }}>Play a quiz cartridge to view your score certificate.</p>
-        <a href="/" className="retro-btn retro-btn-plum">Return to Arcade</a>
+      <div className="retro-card" style={{ padding: '3rem', textAlign: 'center', backgroundColor: '#360185', borderColor: '#8F0177', color: '#F4B342' }}>
+        <h2 style={{ color: '#F4B342', marginBottom: '1rem', fontSize: '2rem' }}>No Active Results Found</h2>
+        <p style={{ marginBottom: '1.5rem', opacity: 0.9 }}>Play a retro quiz cartridge to generate an arcade score certificate.</p>
+        <a href="/" className="retro-btn retro-btn-gold">Return to Arcade</a>
       </div>
     );
   }
 
   const correctCount = results.answersLog.filter(a => a.isCorrect).length;
   const incorrectCount = results.answersLog.length - correctCount;
-  const accuracy = results.answersLog.length > 0 ? Math.round((correctCount / results.answersLog.length) * 100) : 0;
+  const accuracy = typeof results.accuracy === 'number'
+    ? results.accuracy
+    : (results.answersLog.length > 0 ? Math.round((correctCount / results.answersLog.length) * 100) : 0);
 
   const filteredLog = results.answersLog.filter(item => {
     if (filter === 'correct') return item.isCorrect;
@@ -146,7 +172,7 @@ export default function ResultsPage() {
             <div className="font-arcade" style={{ fontSize: '2.2rem', color: '#F4B342', fontWeight: 'bold' }}>
               {results.score}
             </div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#F4B342' }}>FINAL SCORE</div>
+            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#F4B342' }}>TOTAL SCORE</div>
           </div>
 
           <div className="retro-card" style={{ padding: '1rem', backgroundColor: '#8F0177', borderColor: '#F4B342', boxShadow: '3px 3px 0px #360185' }}>
@@ -172,7 +198,7 @@ export default function ResultsPage() {
         </div>
 
         {/* MS SQL Save Status Badge */}
-        <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
           <span
             className="retro-sticker"
             style={{
@@ -180,14 +206,38 @@ export default function ResultsPage() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.5rem',
-              backgroundColor: '#8F0177',
+              backgroundColor: savedToDb ? '#8F0177' : (savedToDb === false ? '#DE1A58' : '#360185'),
               color: '#F4B342',
-              borderColor: '#F4B342'
+              borderColor: '#F4B342',
+              padding: '0.5rem 1rem'
             }}
           >
             <RetroFloppyIcon size={20} />
-            <span>{savedToDb ? 'RECORD COMMITTED TO MS SQL SERVER' : 'RECORD CACHED IN LOCAL LEADERBOARD'}</span>
+            <span>
+              {savedToDb === null && 'COMMITTING RECORD TO MICROSOFT SQL SERVER...'}
+              {savedToDb === true && `✓ COMMITTED TO MS SQL SERVER${dbScoreId ? ` (ID #${dbScoreId})` : ''}`}
+              {savedToDb === false && '⚠ COULD NOT PERSIST SCORE TO MS SQL SERVER'}
+            </span>
           </span>
+
+          {savedToDb === false && (
+            <div style={{ marginTop: '0.5rem', textAlign: 'center' }}>
+              {dbErrorMessage && (
+                <div style={{ color: '#F4B342', fontSize: '0.88rem', marginBottom: '0.5rem', maxWidth: '500px' }}>
+                  {dbErrorMessage}
+                </div>
+              )}
+              <button
+                type="button"
+                className="retro-btn retro-btn-gold"
+                style={{ fontSize: '0.85rem', padding: '0.35rem 0.85rem' }}
+                disabled={isRetrying}
+                onClick={() => saveScoreToDatabase(results, accuracy)}
+              >
+                {isRetrying ? 'Retrying...' : '↺ Retry MS SQL Connection'}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Navigation Action Buttons */}
@@ -311,7 +361,7 @@ export default function ResultsPage() {
 
                 <div style={{ fontSize: '0.92rem', marginBottom: '0.35rem' }}>
                   <span style={{ fontWeight: 700 }}>Your Answer: </span>
-                  <span style={{ color: item.isCorrect ? '#F4B342' : '#F4B342', fontWeight: 600 }}>
+                  <span style={{ color: '#F4B342', fontWeight: 600 }}>
                     {item.selectedIndex >= 0 ? item.options[item.selectedIndex] : '(Timed out / Skipped)'}
                   </span>
                 </div>

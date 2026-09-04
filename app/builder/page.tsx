@@ -113,26 +113,15 @@ export default function QuizBuilderPage() {
       const data = await res.json();
       if (res.ok && data.success) {
         const created = data.quiz;
-        // Save to browser localStorage as an ultra-resilient local backup
-        try {
-          const localStr = localStorage.getItem('arcade_custom_quizzes');
-          const existing: any[] = localStr ? JSON.parse(localStr) : [];
-          const filtered = existing.filter((q: any) => q.id !== created.id && q.slug !== created.slug);
-          filtered.unshift(created);
-          localStorage.setItem('arcade_custom_quizzes', JSON.stringify(filtered));
-        } catch (storageErr) {
-          console.warn('LocalStorage save warning:', storageErr);
-        }
-
         const playTarget = created.slug || created.id;
         setSavedQuizSlug(String(playTarget));
         retroSound.playFanfare();
-        setStatusMsg({ text: '★ Cartridge successfully etched into Database! Ready to play! ★', type: 'success' });
+        setStatusMsg({ text: '★ Cartridge successfully etched into Microsoft SQL Server! Ready to play! ★', type: 'success' });
       } else {
-        setStatusMsg({ text: data.error || 'Failed to save cartridge.', type: 'error' });
+        setStatusMsg({ text: data.error || 'Failed to save cartridge to Microsoft SQL Server.', type: 'error' });
       }
     } catch (e: any) {
-      setStatusMsg({ text: e.message || 'Network error saving cartridge.', type: 'error' });
+      setStatusMsg({ text: e.message || 'Network error communicating with Microsoft SQL Server.', type: 'error' });
     } finally {
       setSaving(false);
     }

@@ -48,17 +48,16 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Scores')
 BEGIN
     CREATE TABLE Scores (
         ScoreId INT IDENTITY(1,1) PRIMARY KEY,
-        QuizId INT NOT NULL,
-        GamerTag NVARCHAR(30) NOT NULL,
+        QuizId INT NULL,
+        QuizTitle NVARCHAR(200) NULL,
+        GamerTag NVARCHAR(50) NOT NULL,
         Score INT NOT NULL,
         Accuracy INT NOT NULL,
         MaxStreak INT NOT NULL DEFAULT 0,
         GameMode NVARCHAR(30) NOT NULL DEFAULT 'standard',
         TimeSpentSeconds INT NOT NULL DEFAULT 0,
-        PlayedAt DATETIME2 DEFAULT SYSUTCDATETIME(),
-        CONSTRAINT FK_Scores_Quizzes FOREIGN KEY (QuizId) REFERENCES Quizzes(QuizId) ON DELETE CASCADE
+        PlayedAt DATETIME2 DEFAULT SYSUTCDATETIME()
     );
-    CREATE INDEX IX_Scores_QuizId_Score ON Scores(QuizId, Score DESC);
     CREATE INDEX IX_Scores_Score ON Scores(Score DESC);
     CREATE INDEX IX_Scores_PlayedAt ON Scores(PlayedAt DESC);
 END;
@@ -79,10 +78,10 @@ SELECT
     s.GameMode,
     s.TimeSpentSeconds,
     s.PlayedAt,
-    q.QuizId,
-    q.Title AS QuizTitle,
-    q.Category,
-    q.Icon
+    s.QuizId,
+    COALESCE(q.Title, s.QuizTitle, 'Retro Cartridge') AS QuizTitle,
+    COALESCE(q.Category, 'custom') AS Category,
+    COALESCE(q.Icon, '🕹️') AS Icon
 FROM Scores s
-INNER JOIN Quizzes q ON s.QuizId = q.QuizId;
+LEFT JOIN Quizzes q ON s.QuizId = q.QuizId;
 GO

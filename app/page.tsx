@@ -31,67 +31,38 @@ export default function HomePage() {
   const [gamerTag, setGamerTag] = useState('PLAYER_1');
   const [gameMode, setGameMode] = useState<'standard' | 'blitz' | 'practice' | 'survival'>('standard');
   const [loading, setLoading] = useState(true);
+  const [dbError, setDbError] = useState<string | null>(null);
+
+  const fetchQuizzes = () => {
+    setLoading(true);
+    setDbError(null);
+
+    fetch('/api/quizzes')
+      .then(async res => {
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data?.error || `Failed to fetch quizzes from MS SQL Server (HTTP ${res.status})`);
+        }
+        return data;
+      })
+      .then(data => {
+        if (Array.isArray(data?.quizzes)) {
+          setQuizzes(data.quizzes);
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to load quizzes from Microsoft SQL Server:', err);
+        setDbError(err.message || 'Could not connect to Microsoft SQL Server database.');
+        setLoading(false);
+      });
+  };
 
   useEffect(() => {
     const savedTag = localStorage.getItem('arcade_gamertag');
     if (savedTag) setGamerTag(savedTag);
 
-    fetch('/api/quizzes')
-      .then(res => res.json())
-      .then(data => {
-        let list: QuizSummary[] = data?.quizzes || [];
-        // Merge with locally stored cartridges if any
-        try {
-          const localStr = localStorage.getItem('arcade_custom_quizzes');
-          if (localStr) {
-            const localList = JSON.parse(localStr);
-            if (Array.isArray(localList)) {
-              for (const lq of localList) {
-                if (!list.some(q => String(q.id) === String(lq.id) || (q.slug && q.slug === lq.slug))) {
-                  list.unshift({
-                    id: lq.id,
-                    slug: lq.slug,
-                    title: lq.title,
-                    description: lq.description,
-                    category: lq.category,
-                    icon: lq.icon,
-                    difficulty: lq.difficulty || 'medium',
-                    questionCount: lq.questions?.length || lq.questionCount || 1
-                  });
-                }
-              }
-            }
-          }
-        } catch {
-          // Ignore
-        }
-        setQuizzes(list);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Failed to load quizzes:', err);
-        try {
-          const localStr = localStorage.getItem('arcade_custom_quizzes');
-          if (localStr) {
-            const localList = JSON.parse(localStr);
-            if (Array.isArray(localList)) {
-              setQuizzes(localList.map((lq: any) => ({
-                id: lq.id,
-                slug: lq.slug,
-                title: lq.title,
-                description: lq.description,
-                category: lq.category,
-                icon: lq.icon,
-                difficulty: lq.difficulty || 'medium',
-                questionCount: lq.questions?.length || 1
-              })));
-            }
-          }
-        } catch {
-          // Ignore
-        }
-        setLoading(false);
-      });
+    fetchQuizzes();
   }, []);
 
   const handleGamerTagChange = (val: string) => {
@@ -161,7 +132,7 @@ export default function HomePage() {
         </h1>
 
         <p style={{ fontSize: '1.2rem', color: '#F4B342', maxWidth: '650px', margin: '0 auto 1.75rem', fontWeight: 600, opacity: 0.95 }}>
-          Step back into the 1980s &amp; 1990s! Test your knowledge across retro computing, modern tech, science, and history. High scores saved to Microsoft SQL Server.
+          Step back into the 1980s &amp; 1990s! Test your knowledge across retro computing, modern tech, science, and history. Quizzes and high scores saved to Microsoft SQL Server.
         </p>
 
         {/* Gamer Tag Handle Input - Strict 4-color styling */}
@@ -201,6 +172,37 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Database Connection Notice if offline */}
+      {dbError && (
+        <div
+          className="retro-card"
+          style={{
+            padding: '1.5rem',
+            marginBottom: '2rem',
+            backgroundColor: '#8F0177',
+            borderColor: '#DE1A58',
+            boxShadow: '4px 4px 0px #360185',
+            color: '#F4B342',
+            textAlign: 'center'
+          }}
+        >
+          <div style={{ fontWeight: 800, fontSize: '1.2rem', marginBottom: '0.5rem' }}>
+            ⚠️ MICROSOFT SQL SERVER NOT CONNECTED
+          </div>
+          <p style={{ fontSize: '0.95rem', marginBottom: '1rem', opacity: 0.95 }}>
+            {dbError}
+          </p>
+          <button
+            type="button"
+            className="retro-btn retro-btn-gold"
+            onClick={fetchQuizzes}
+            style={{ fontSize: '0.9rem', padding: '0.5rem 1.25rem' }}
+          >
+            ↺ Retry MS SQL Connection
+          </button>
+        </div>
+      )}
+
       {/* Game Mode Selection - Strict 4-color styling */}
       <section style={{ marginBottom: '2.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
@@ -233,7 +235,7 @@ export default function HomePage() {
               Standard Arcade
             </h3>
             <p style={{ fontSize: '0.88rem', color: '#F4B342', opacity: 0.9 }}>
-              15s timer per question. Combos, streak multipliers, and time bonuses.
+              15s timer per question. Combos, streak multipliers, and speed bonuses.
             </p>
           </div>
 
@@ -318,15 +320,27 @@ export default function HomePage() {
             2. CHOOSE YOUR CARTRIDGE
           </h2>
           <span className="font-arcade" style={{ fontSize: '1.2rem', color: '#8F0177' }}>
-            {quizzes.length} AVAILABLE
+            {quizzes.length} AVAILABLE IN MS SQL
           </span>
         </div>
 
         {loading ? (
           <div className="retro-card" style={{ padding: '3rem', textAlign: 'center', backgroundColor: '#360185', borderColor: '#8F0177' }}>
             <div className="font-arcade" style={{ fontSize: '2rem', color: '#F4B342' }}>
-              INSERTING CARTRIDGES...
+              QUERYING MICROSOFT SQL SERVER...
             </div>
+          </div>
+        ) : quizzes.length === 0 ? (
+          <div className="retro-card" style={{ padding: '3rem', textAlign: 'center', backgroundColor: '#360185', borderColor: '#8F0177', color: '#F4B342' }}>
+            <div className="font-arcade" style={{ fontSize: '1.8rem', marginBottom: '1rem' }}>
+              NO CARTRIDGES FOUND
+            </div>
+            <p style={{ marginBottom: '1.5rem', opacity: 0.9 }}>
+              No quizzes exist in the Microsoft SQL Server database yet.
+            </p>
+            <a href="/builder" className="retro-btn retro-btn-gold">
+              Create First Cartridge
+            </a>
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>

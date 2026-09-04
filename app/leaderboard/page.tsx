@@ -8,19 +8,28 @@ import { RetroTrophyIcon } from '@/components/RetroIcons';
 export default function LeaderboardPage() {
   const [scores, setScores] = useState<ScoreRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const fetchScores = () => {
     setLoading(true);
-    fetch('/api/scores?limit=30')
-      .then(res => res.json())
+    setErrorMessage(null);
+    fetch('/api/scores?limit=50')
+      .then(async res => {
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data?.error || `Failed to fetch leaderboard from MS SQL Server (HTTP ${res.status})`);
+        }
+        return data;
+      })
       .then(data => {
-        if (data?.scores) {
+        if (Array.isArray(data?.scores)) {
           setScores(data.scores);
         }
         setLoading(false);
       })
       .catch(err => {
-        console.error('Failed to load scores:', err);
+        console.error('Failed to load scores from MS SQL Server:', err);
+        setErrorMessage(err.message || 'Could not query Microsoft SQL Server database.');
         setLoading(false);
       });
   };
@@ -66,8 +75,39 @@ export default function LeaderboardPage() {
         </p>
       </div>
 
+      {/* Error Card if MS SQL is not reachable */}
+      {errorMessage && (
+        <div
+          className="retro-card"
+          style={{
+            padding: '1.5rem',
+            marginBottom: '2rem',
+            backgroundColor: '#8F0177',
+            borderColor: '#DE1A58',
+            boxShadow: '4px 4px 0px #360185',
+            color: '#F4B342',
+            textAlign: 'center'
+          }}
+        >
+          <div style={{ fontWeight: 800, fontSize: '1.2rem', marginBottom: '0.5rem' }}>
+            ⚠️ MICROSOFT SQL SERVER CONNECTION NOTICE
+          </div>
+          <p style={{ fontSize: '0.95rem', marginBottom: '1rem', opacity: 0.95 }}>
+            {errorMessage}
+          </p>
+          <button
+            type="button"
+            className="retro-btn retro-btn-gold"
+            onClick={fetchScores}
+            style={{ fontSize: '0.9rem', padding: '0.5rem 1.25rem' }}
+          >
+            ↺ Retry MS SQL Query
+          </button>
+        </div>
+      )}
+
       {/* Top 3 Podium Highlights - Strict 4 Colors */}
-      {scores.length >= 3 && (
+      {!loading && scores.length >= 3 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
           {/* #2 Silver Position - Magenta */}
           <div className="retro-card" style={{ padding: '1.5rem 1.25rem', textAlign: 'center', backgroundColor: '#8F0177', borderColor: '#F4B342', boxShadow: '4px 4px 0px #360185', color: '#F4B342', order: 1 }}>
@@ -138,6 +178,7 @@ export default function LeaderboardPage() {
           <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#F4B342' }}>
             RECENT TOP RECORDS
           </h2>
+
           <button
             type="button"
             className="retro-btn retro-btn-gold"
@@ -157,7 +198,7 @@ export default function LeaderboardPage() {
           </div>
         ) : scores.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '3rem', color: '#F4B342', opacity: 0.8 }}>
-            No scores registered yet. Be the first player to enter the arcade hall of fame!
+            No scores registered yet in Microsoft SQL Server. Be the first player to etch your name!
           </div>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.95rem' }}>
@@ -203,6 +244,7 @@ export default function LeaderboardPage() {
                       className="retro-sticker"
                       style={{
                         fontSize: '0.85rem',
+                        padding: '0.15rem 0.45rem',
                         backgroundColor: '#DE1A58',
                         color: '#F4B342',
                         borderColor: '#F4B342'

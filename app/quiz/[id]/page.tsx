@@ -35,15 +35,35 @@ function QuizPlayContent() {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [answersLog, setAnswersLog] = useState<AnswerLogItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [totalTimeSpent, setTotalTimeSpent] = useState(0);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [lastAwarded, setLastAwarded] = useState<{ points: number; text: string; isCorrect: boolean } | null>(null);
 
+  // Synchronous reference trackers to guarantee 0 dropped points on closure boundaries
+  const scoreRef = useRef(0);
+  const streakRef = useRef(0);
+  const maxStreakRef = useRef(0);
+  const answersLogRef = useRef<AnswerLogItem[]>([]);
+  const totalTimeSpentRef = useRef(0);
+  const currentIndexRef = useRef(0);
+  const timeRemainingRef = useRef(15);
+  const quizRef = useRef<Quiz | null>(null);
+  const questionsRef = useRef<Question[]>([]);
+  const isFinishingRef = useRef(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const setupQuestions = useCallback((rawQuiz: any) => {
+  // Keep timeRemainingRef synced with state
+  useEffect(() => {
+    timeRemainingRef.current = timeRemaining;
+  }, [timeRemaining]);
+
+  const setupQuestions = useCallback((rawQuiz: Quiz) => {
+    quizRef.current = rawQuiz;
     setQuiz(rawQuiz);
+
     const rawQuestions = Array.isArray(rawQuiz.questions) ? rawQuiz.questions : [];
     if (rawQuestions.length === 0) {
       setQuestions([]);
+      questionsRef.current = [];
       return;
     }
 
@@ -67,77 +87,67 @@ function QuizPlayContent() {
       };
     });
 
+    questionsRef.current = prepared;
     setQuestions(prepared);
-    if (gameMode === 'blitz') {
-      setTimeRemaining(60);
-    } else if (gameMode === 'standard' || gameMode === 'survival') {
-      setTimeRemaining(15);
-    }
+
+    const initialTime = gameMode === 'blitz' ? 60 : 15;
+    setTimeRemaining(initialTime);
+    timeRemainingRef.current = initialTime;
   }, [gameMode]);
 
-  const tryLocalFallback = useCallback(() => {
-    try {
-      const localStr = localStorage.getItem('arcade_custom_quizzes');
-      if (localStr) {
-        const localQuizzes: any[] = JSON.parse(localStr);
-        const cleanTarget = decodeURIComponent(quizId).toLowerCase();
-        const found = localQuizzes.find((q: any) => 
-          String(q.id).toLowerCase() === cleanTarget ||
-          (q.slug && q.slug.toLowerCase() === cleanTarget) ||
-          (q.slug && q.slug.toLowerCase().replace(/[^a-z0-9]+/g, '-') === cleanTarget.replace(/[^a-z0-9]+/g, '-')) ||
-          (q.title && q.title.toLowerCase() === cleanTarget)
-        );
-        if (found) {
-          setupQuestions(found);
-          setLoading(false);
-          return true;
-        }
-      }
-    } catch (e) {
-      console.error('Failed to load quiz from localStorage:', e);
-    }
-    return false;
-  }, [quizId, setupQuestions]);
-
-  // Fetch Quiz Data
+  // Fetch Quiz directly from MS SQL Server backend
   useEffect(() => {
     if (!quizId) return;
 
+    setLoading(true);
+    setErrorMessage(null);
+
     fetch(`/api/quizzes/${quizId}`)
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data?.error || `Failed to fetch quiz from MS SQL Server (HTTP ${res.status})`);
+        }
+        return data;
       })
       .then(data => {
         if (data?.quiz) {
           setupQuestions(data.quiz);
           setLoading(false);
         } else {
-          const ok = tryLocalFallback();
-          if (!ok) setLoading(false);
+          setErrorMessage('Cartridge data was not returned by Microsoft SQL Server.');
+          setLoading(false);
         }
       })
       .catch(err => {
-        console.warn('Backend fetch failed, attempting local fallback:', err);
-        const ok = tryLocalFallback();
-        if (!ok) setLoading(false);
+        setErrorMessage(err.message || 'Cartridge not found in Microsoft SQL Server.');
+        setLoading(false);
       });
-  }, [quizId, gameMode, setupQuestions, tryLocalFallback]);
+  }, [quizId, setupQuestions]);
 
-  // Finish Quiz and Redirect to Results
+  // Guaranteed Atomic Finish Quiz Handler
   const finishQuiz = useCallback((reason = 'completed') => {
+    if (isFinishingRef.current) return;
+    isFinishingRef.current = true;
+
     if (timerRef.current) clearInterval(timerRef.current);
 
+    const finalAnswers = answersLogRef.current;
+    const correctCount = finalAnswers.filter(a => a.isCorrect).length;
+    const totalCount = finalAnswers.length;
+    const accuracy = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
+
     const resultPayload = {
-      quizId: quiz?.id || 1,
-      quizTitle: quiz?.title || 'Retro Quiz',
+      quizId: quizRef.current?.id || 1,
+      quizTitle: quizRef.current?.title || 'Retro Quiz',
       gamerTag,
       gameMode,
-      score,
-      maxStreak,
-      totalQuestions: questions.length,
-      totalTimeSpent,
-      answersLog,
+      score: scoreRef.current,
+      accuracy,
+      maxStreak: maxStreakRef.current,
+      totalQuestions: questionsRef.current.length || totalCount,
+      totalTimeSpent: totalTimeSpentRef.current,
+      answersLog: finalAnswers,
       reason
     };
 
@@ -145,22 +155,25 @@ function QuizPlayContent() {
       sessionStorage.setItem('last_quiz_results', JSON.stringify(resultPayload));
       window.location.href = '/results';
     }
-  }, [quiz, gamerTag, gameMode, score, maxStreak, questions.length, totalTimeSpent, answersLog]);
+  }, [gamerTag, gameMode]);
 
-  // Timer Tick Handling
+  // Timer Tick Handler
   useEffect(() => {
     if (loading || questions.length === 0 || gameMode === 'practice' || isAnswerSubmitted) {
       return;
     }
 
     timerRef.current = setInterval(() => {
-      setTotalTimeSpent(prev => prev + 1);
+      totalTimeSpentRef.current += 1;
       setTimeRemaining(prev => {
-        if (prev <= 4 && prev > 1) {
+        const nextVal = prev - 1;
+        timeRemainingRef.current = nextVal;
+
+        if (nextVal <= 4 && nextVal > 0) {
           retroSound.playTick();
         }
 
-        if (prev <= 1) {
+        if (nextVal <= 0) {
           clearInterval(timerRef.current!);
           if (gameMode === 'blitz') {
             finishQuiz('time_up');
@@ -170,52 +183,79 @@ function QuizPlayContent() {
             return 0;
           }
         }
-        return prev - 1;
+        return nextVal;
       });
     }, 1000);
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [loading, questions.length, gameMode, isAnswerSubmitted, currentIndex]);
+  }, [loading, questions.length, gameMode, isAnswerSubmitted, currentIndex, finishQuiz]);
 
+  // Answer Selection & Point Calculation
   const handleAnswerSelect = (optionIndex: number, isTimeout = false) => {
-    if (isAnswerSubmitted) return;
+    if (isAnswerSubmitted || isFinishingRef.current) return;
     if (timerRef.current) clearInterval(timerRef.current);
 
     setIsAnswerSubmitted(true);
     setSelectedOption(optionIndex);
 
-    const currentQ = questions[currentIndex];
+    const currentQ = questionsRef.current[currentIndexRef.current];
+    if (!currentQ) return;
+
     const isCorrect = !isTimeout && optionIndex === currentQ.correctOption;
 
     let pointsAwarded = 0;
+    let feedbackText = '';
+
     if (isCorrect) {
       retroSound.playCorrect();
-      const nextStreak = streak + 1;
-      setStreak(nextStreak);
-      if (nextStreak > maxStreak) setMaxStreak(nextStreak);
+      const nextStreak = streakRef.current + 1;
+      streakRef.current = nextStreak;
+      if (nextStreak > maxStreakRef.current) {
+        maxStreakRef.current = nextStreak;
+      }
 
+      // Transparent streak multiplier: 1x, 1.2x (2+), 1.5x (4+), 2.0x (6+)
       let multiplier = 1.0;
       if (nextStreak >= 6) multiplier = 2.0;
       else if (nextStreak >= 4) multiplier = 1.5;
       else if (nextStreak >= 2) multiplier = 1.2;
 
-      const timeBonus = (gameMode === 'standard' || gameMode === 'survival') ? timeRemaining * 10 : 20;
-      pointsAwarded = Math.round((100 + timeBonus) * multiplier);
-      setScore(prev => prev + pointsAwarded);
+      // Speed bonus: Standard/Survival: remaining seconds * 10. Blitz: flat 30. Practice: 0
+      const basePoints = 100;
+      const speedBonus = (gameMode === 'standard' || gameMode === 'survival')
+        ? Math.max(0, timeRemainingRef.current) * 10
+        : (gameMode === 'blitz' ? 30 : 0);
+
+      pointsAwarded = Math.round((basePoints + speedBonus) * multiplier);
+      scoreRef.current += pointsAwarded;
+
+      if (multiplier > 1) {
+        feedbackText = `+${pointsAwarded} PTS! [Base ${basePoints} + Speed ${speedBonus}] × ${multiplier}x Multiplier!`;
+      } else {
+        feedbackText = `+${pointsAwarded} PTS! [Base ${basePoints} + Speed ${speedBonus}]`;
+      }
 
       if (gameMode === 'blitz') {
         setTimeRemaining(prev => Math.min(99, prev + 3));
       }
     } else {
       retroSound.playIncorrect();
-      setStreak(0);
+      streakRef.current = 0;
+      feedbackText = isTimeout ? 'TIME EXPIRED! 0 PTS • STREAK RESET' : 'INCORRECT! 0 PTS • STREAK RESET';
       if (gameMode === 'blitz') {
         setTimeRemaining(prev => Math.max(0, prev - 2));
       }
     }
 
+    // Update state for UI display
+    setScore(scoreRef.current);
+    setStreak(streakRef.current);
+    setMaxStreak(maxStreakRef.current);
+    setLastAwarded({ points: pointsAwarded, text: feedbackText, isCorrect });
+
+    // Append to synchronized answer log
     const logEntry: AnswerLogItem = {
       questionText: currentQ.questionText,
       codeSnippet: currentQ.codeSnippet,
@@ -226,8 +266,10 @@ function QuizPlayContent() {
       explanation: currentQ.explanation
     };
 
-    setAnswersLog(prev => [...prev, logEntry]);
+    answersLogRef.current.push(logEntry);
+    setAnswersLog([...answersLogRef.current]);
 
+    // Handle Survival Mode fail condition
     if (gameMode === 'survival' && !isCorrect) {
       setTimeout(() => {
         finishQuiz('survival_failed');
@@ -235,29 +277,38 @@ function QuizPlayContent() {
       return;
     }
 
+    // Auto-advance if not practice mode
     if (gameMode !== 'practice') {
       setTimeout(() => {
         advanceQuestion();
-      }, 1300);
+      }, 1400);
     }
   };
 
   const advanceQuestion = () => {
-    if (currentIndex + 1 >= questions.length) {
+    if (isFinishingRef.current) return;
+
+    if (currentIndexRef.current + 1 >= questionsRef.current.length) {
       finishQuiz('completed');
     } else {
-      setCurrentIndex(prev => prev + 1);
+      const nextIdx = currentIndexRef.current + 1;
+      currentIndexRef.current = nextIdx;
+      setCurrentIndex(nextIdx);
       setIsAnswerSubmitted(false);
       setSelectedOption(null);
+      setLastAwarded(null);
+
       if (gameMode === 'standard' || gameMode === 'survival') {
         setTimeRemaining(15);
+        timeRemainingRef.current = 15;
       }
     }
   };
 
+  // Keyboard shortcut support
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (loading || questions.length === 0) return;
+      if (loading || questions.length === 0 || isFinishingRef.current) return;
 
       if (isAnswerSubmitted && gameMode === 'practice') {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -283,19 +334,20 @@ function QuizPlayContent() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isAnswerSubmitted, gameMode, currentIndex, questions, loading]);
+  }, [isAnswerSubmitted, gameMode, questions.length, loading]);
 
   if (loading) {
     return (
-      <div className="retro-card" style={{ padding: '4rem 2rem', textAlign: 'center' }}>
-        <div className="font-arcade" style={{ fontSize: '2.5rem', color: 'var(--color-plum)' }}>
-          INSERTING CARTRIDGE...
+      <div className="retro-card" style={{ padding: '4rem 2rem', textAlign: 'center', backgroundColor: '#360185', borderColor: '#8F0177', color: '#F4B342' }}>
+        <div className="font-arcade" style={{ fontSize: '2.5rem', color: '#F4B342', marginBottom: '1rem' }}>
+          QUERYING MICROSOFT SQL SERVER...
         </div>
+        <p style={{ color: '#F4B342', opacity: 0.9 }}>Reading cartridge data from SQL Database...</p>
       </div>
     );
   }
 
-  if (!quiz || questions.length === 0) {
+  if (errorMessage || !quiz || questions.length === 0) {
     return (
       <div
         className="retro-card"
@@ -305,7 +357,7 @@ function QuizPlayContent() {
           backgroundColor: '#360185',
           borderColor: '#8F0177',
           boxShadow: '6px 6px 0px #DE1A58',
-          maxWidth: '520px',
+          maxWidth: '560px',
           margin: '2rem auto'
         }}
       >
@@ -319,7 +371,7 @@ function QuizPlayContent() {
               fontSize: '0.95rem'
             }}
           >
-            ★ CARTRIDGE NOT DETECTED ★
+            ★ MS SQL DATABASE NOTICE ★
           </span>
         </div>
 
@@ -332,11 +384,11 @@ function QuizPlayContent() {
             marginBottom: '1rem'
           }}
         >
-          CARTRIDGE ERROR
+          CARTRIDGE NOT FOUND
         </h2>
 
-        <p style={{ color: '#F4B342', opacity: 0.9, fontSize: '1.05rem', marginBottom: '2rem' }}>
-          Could not load trivia questions for this cartridge. It may have been unetched or removed.
+        <p style={{ color: '#F4B342', opacity: 0.95, fontSize: '1rem', marginBottom: '2rem', lineHeight: 1.5 }}>
+          {errorMessage || 'Could not locate this cartridge in Microsoft SQL Server. It may not exist in the database.'}
         </p>
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
@@ -344,7 +396,7 @@ function QuizPlayContent() {
             Return to Arcade
           </a>
           <a href="/builder" className="retro-btn retro-btn-crimson">
-            Create Cartridge
+            Create in MS SQL
           </a>
         </div>
       </div>
@@ -439,6 +491,27 @@ function QuizPlayContent() {
           />
         </div>
       </div>
+
+      {/* Real-time Point Calculation Banner */}
+      {lastAwarded && (
+        <div
+          style={{
+            marginBottom: '1rem',
+            padding: '0.75rem 1rem',
+            borderRadius: '6px',
+            backgroundColor: lastAwarded.isCorrect ? '#8F0177' : '#DE1A58',
+            border: '2px solid #F4B342',
+            color: '#F4B342',
+            textAlign: 'center',
+            fontWeight: 'bold',
+            fontSize: '1.05rem',
+            letterSpacing: '0.03em'
+          }}
+          className="font-arcade"
+        >
+          {lastAwarded.text}
+        </div>
+      )}
 
       {/* Main Question Card - Strict 4 Colors */}
       <div
