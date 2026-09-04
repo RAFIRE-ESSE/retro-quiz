@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Retro Quiz Arcade - Full System Architecture & Engineering Documentation</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600;700;800&display=swap');
+
+    @page {
+      size: A4;
+      margin: 12mm 12mm 14mm 12mm;
+    }
+
+    :root {
+      --color-violet: #360185;
+      --color-plum: #8F0177;
+      --color-rose: #DE1A58;
+      --color-gold: #F4B342;
+      --color-cream: #FFFDF9;
+      --font-arcade: 'Press Start 2P', monospace;
+      --font-mono: 'Space Mono', monospace;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      color: var(--color-violet);
+      background-color: #ffffff;
+      line-height: 1.45;
+      font-size: 9pt;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .page {
+      page-break-after: always;
+      break-after: page;
+      position: relative;
+      min-height: 260mm;
+      padding: 5px 0;
+    }
+
+    .page-footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1.5px dashed var(--color-plum);
+      padding-top: 6px;
+      font-family: var(--font-mono);
+      font-size: 7.5pt;
+      color: var(--color-plum);
+      font-weight: 700;
+    }
+
+    /* Cover Page */
+    .cover-page {
+      border: 4px solid var(--color-violet);
+      padding: 24px;
+      background: linear-gradient(135deg, #FFFDF9 0%, #FBF6EE 100%);
+      box-shadow: 6px 6px 0px var(--color-plum);
+      min-height: 260mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: var(--color-rose);
+      color: var(--color-gold);
+      border: 2px solid var(--color-violet);
+      padding: 4px 10px;
+      font-family: var(--font-arcade);
+      font-size: 7.5pt;
+      font-weight: bold;
+      transform: rotate(-1.5deg);
+      box-shadow: 2px 2px 0px var(--color-violet);
+    }
+
+    .cover-title {
+      font-family: var(--font-arcade);
+      font-size: 18pt;
+      color: var(--color-violet);
+      line-height: 1.35;
+      margin: 20px 0 10px 0;
+    }
+
+    .cover-subtitle {
+      font-family: var(--font-mono);
+      font-size: 10.5pt;
+      color: var(--color-plum);
+      font-weight: 700;
+    }
+
+    .cover-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .retro-box {
+      border: 2px solid var(--color-violet);
+      background-color: #ffffff;
+      padding: 12px;
+      box-shadow: 3px 3px 0px var(--color-rose);
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .retro-box.plum-accent {
+      background-color: var(--color-violet);
+      color: var(--color-gold);
+      border-color: var(--color-plum);
+      box-shadow: 3px 3px 0px var(--color-plum);
+    }
+
+    .retro-box-title {
+      font-family: var(--font-arcade);
+      font-size: 8pt;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Headings */
+    h1 {
+      font-family: var(--font-arcade);
+      font-size: 11.5pt;
+      color: var(--color-violet);
+      border-bottom: 2.5px solid var(--color-rose);
+      padding-bottom: 5px;
+      margin: 0 0 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    h2 {
+      font-family: var(--font-mono);
+      font-size: 9.5pt;
+      color: var(--color-plum);
+      margin: 12px 0 6px 0;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    p, li {
+      font-size: 8.8pt;
+      margin-bottom: 5px;
+    }
+
+    ul, ol {
+      padding-left: 18px;
+      margin-bottom: 8px;
+    }
+
+    /* Custom Symbols Theme */
+    .symbol-card {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--color-cream);
+      border: 1.5px solid var(--color-violet);
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-weight: bold;
+      font-size: 8pt;
+      color: var(--color-violet);
+      box-shadow: 1.5px 1.5px 0px var(--color-plum);
+      margin: 2px;
+    }
+
+    .symbol-icon {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0;
+      font-size: 8pt;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    th {
+      background-color: var(--color-violet);
+      color: var(--color-gold);
+      font-family: var(--font-arcade);
+      font-size: 7pt;
+      text-align: left;
+      padding: 5px 7px;
+      border: 1.5px solid var(--color-violet);
+    }
+
+    td {
+      padding: 5px 7px;
+      border: 1.5px solid var(--color-plum);
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td {
+      background-color: #faf5fc;
+    }
+
+    /* Code Blocks */
+    pre, code {
+      font-family: var(--font-mono);
+      font-size: 7.5pt;
+    }
+
+    pre {
+      background-color: #1a0140;
+      color: var(--color-gold);
+      border: 1.5px solid var(--color-plum);
+      padding: 7px 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+      margin: 6px 0 8px 0;
+      box-shadow: 2.5px 2.5px 0px var(--color-rose);
+      line-height: 1.35;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    /* Visual Architecture Flow Diagram */
+    .arch-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background-color: #f9f5fc;
+      border: 2px solid var(--color-violet);
+      padding: 10px;
+      margin: 10px 0;
+      box-shadow: 3px 3px 0px var(--color-plum);
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .arch-level {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .arch-node {
+      flex: 1;
+      border: 1.5px solid var(--color-violet);
+      padding: 6px 8px;
+      background-color: #ffffff;
+      text-align: center;
+      border-radius: 4px;
+      box-shadow: 2px 2px 0px var(--color-rose);
+    }
+
+    .arch-node.primary {
+      background-color: var(--color-violet);
+      color: var(--color-gold);
+      border-color: var(--color-plum);
+    }
+
+    .arch-node.accent {
+      background-color: var(--color-plum);
+      color: #ffffff;
+      border-color: var(--color-gold);
+    }
+
+    .arch-arrow {
+      text-align: center;
+      font-family: var(--font-arcade);
+      font-size: 7pt;
+      color: var(--color-rose);
+      margin: -2px 0;
+    }
+
+    .formula-box {
+      border: 1.5px solid var(--color-violet);
+      background-color: #fff9e6;
+      padding: 8px 10px;
+      margin: 8px 0;
+      border-left: 5px solid var(--color-gold);
+      font-family: var(--font-mono);
+      font-weight: bold;
+      color: var(--color-violet);
+      box-shadow: 2.5px 2.5px 0px var(--color-rose);
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin: 8px 0;
+    }
+
+    .color-swatch {
+      border: 1.5px solid var(--color-violet);
+      padding: 6px;
+      border-radius: 4px;
+      color: #ffffff;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 7.5pt;
+      font-weight: bold;
+      box-shadow: 1.5px 1.5px 0px var(--color-violet);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== PAGE 1: COVER ==================== -->
+  <div class="page cover-page">
+    <div>
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2.5px dashed var(--color-plum); padding-bottom: 15px;">
+        <span class="badge">★ OFFICIAL SYSTEM SPECIFICATION ★</span>
+        <span style="font-family: var(--font-arcade); font-size: 7.5pt; color: var(--color-plum);">VER 2.4.0 • REV 2026</span>
+      </div>
+      <h1 class="cover-title">RETRO VINTAGE QUIZ ARCADE</h1>
+      <div class="cover-subtitle">Complete End-to-End System Architecture, Serverless Backend & Cloud RDBMS Engineering Guide</div>
+
+      <div class="cover-grid">
+        <div class="retro-box plum-accent">
+          <div class="retro-box-title">
+            <svg class="symbol-icon" viewBox="0 0 24 24"><path d="M4 6h16v12H4z M2 4h20v16H2z M8 10h8v4H8z"/></svg>
+            SYSTEM OVERVIEW
+          </div>
+          <p style="font-size: 8.2pt; line-height: 1.4; opacity: 0.95;">
+            A full-stack, authentic 1980s/1990s arcade quiz platform running on <strong>Next.js 14 App Router</strong>, synthesized <strong>Web Audio API</strong> sound synthesizer, and <strong>Neon Serverless PostgreSQL</strong> relational database cloud.
+          </p>
+        </div>
+
+        <div class="retro-box">
+          <div class="retro-box-title" style="color: var(--color-violet);">
+            <svg class="symbol-icon" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            CORE HIGHLIGHTS
+          </div>
+          <ul style="font-size: 8pt; padding-left: 14px; margin-bottom: 0;">
+            <li><strong>Cloud RDBMS:</strong> Neon PostgreSQL Serverless</li>
+            <li><strong>Deployment:</strong> 1-Click Vercel Edge Serverless</li>
+            <li><strong>State Engine:</strong> Zero-Race Sync Ref Tracker</li>
+            <li><strong>Palette:</strong> 4-Color High Contrast Standard</li>
+            <li><strong>Audio:</strong> Procedural 8-bit Sound (0 WAVs)</li>
+          </ul>
+        </div>
+
+        <div class="retro-box">
+          <div class="retro-box-title" style="color: var(--color-violet);">
+            <svg class="symbol-icon" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+            DATA INTEGRITY
+          </div>
+          <p style="font-size: 8pt;">
+            Full relational schema with foreign key cascades, self-healing auto-migrations, automatic seeders, and protected 32-bit integer boundaries.
+          </p>
+        </div>
+
+        <div class="retro-box plum-accent">
+          <div class="retro-box-title">
+            <svg class="symbol-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+            REPOSITORY & LIVE URL
+          </div>
+          <p style="font-size: 7.8pt; font-family: var(--font-mono); margin-bottom: 2px;">
+            GitHub: RAFIRE-ESSE/retro-quiz
+          </p>
+          <p style="font-size: 7.8pt; font-family: var(--font-mono); color: var(--color-gold);">
+            Live: retro-quiz-ivory.vercel.app
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div style="border-top: 2px solid var(--color-violet); padding-top: 10px; display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 8pt; color: var(--color-plum); font-weight: bold;">
+      <span>DEVELOPED WITH NEXT.JS 14 &amp; TYPESCRIPT</span>
+      <span>100% OPEN SOURCE &amp; CLOUD NATIVE • PAGE 1 OF 5</span>
+    </div>
+  </div>
+
+  <!-- ==================== PAGE 2: ARCHITECTURE & SYMBOLS ==================== -->
+  <div class="page">
+    <h1>
+      <svg class="symbol-icon" style="width: 18px; height: 18px;" viewBox="0 0 24 24"><path d="M3 3h18v18H3z M7 7h10v10H7z"/></svg>
+      1. SYSTEM ARCHITECTURE &amp; SYMBOLS
+    </h1>
+
+    <h2>Custom Retro Theme Symbols Dictionary</h2>
+    <p>The system utilizes an iconic retro arcade symbolic convention across the UI and documentation:</p>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px;">
+      <span class="symbol-card">🕹️ <strong>ARCADE_CORE</strong> (Game Engine)</span>
+      <span class="symbol-card">💾 <strong>CARTRIDGE</strong> (Quiz Package)</span>
+      <span class="symbol-card">🗄️ <strong>RDBMS_CLOUD</strong> (Neon PostgreSQL)</span>
+      <span class="symbol-card">⚡ <strong>BLITZ_CLOCK</strong> (Time Attack)</span>
+      <span class="symbol-card">💀 <strong>PERMADEATH</strong> (Sudden Death)</span>
+      <span class="symbol-card">🏆 <strong>HALL_OF_FAME</strong> (Leaderboard)</span>
+      <span class="symbol-card">🪙 <strong>INSERT_COIN</strong> (Player Auth)</span>
+      <span class="symbol-card">🔒 <strong>ACID_TX</strong> (Transaction Guard)</span>
+      <span class="symbol-card">🌐 <strong>EDGE_DISPATCH</strong> (Vercel Serverless)</span>
+      <span class="symbol-card">💡 <strong>HISTORICAL_LOG</strong> (Question Rationale)</span>
+    </div>
+
+    <h2>High-Level System Flow Diagram</h2>
+    <div class="arch-diagram">
+      <div class="arch-level">
+        <div class="arch-node primary">
+          <strong>CLIENT / USER BROWSER</strong><br>
+          <span style="font-size: 7pt;">Next.js 14 Client Components • Web Audio API • CRT Shader</span>
+        </div>
+      </div>
+      <div class="arch-arrow">▼ HTTPS REQUESTS (JSON REST API) ▼</div>
+      <div class="arch-level">
+        <div class="arch-node accent">
+          <strong>VERCEL EDGE SERVERLESS PLATFORM</strong><br>
+          <span style="font-size: 7pt;">App Router API Handlers: /api/quizzes • /api/scores • /api/health</span>
+        </div>
+      </div>
+      <div class="arch-arrow">▼ SECURE HTTP/TLS POOLING ▼</div>
+      <div class="arch-level">
+        <div class="arch-node">
+          <strong>UNIFIED DATABASE ADAPTER (lib/db.ts)</strong><br>
+          <span style="font-size: 7pt;">@neondatabase/serverless Driver • Auto-Seeder • Migration Manager</span>
+        </div>
+      </div>
+      <div class="arch-arrow">▼ PARAMETERIZED SQL STATEMENTS ▼</div>
+      <div class="arch-level">
+        <div class="arch-node primary">
+          <strong>NEON SERVERLESS POSTGRESQL (AWS us-east-1)</strong><br>
+          <span style="font-size: 7pt;">Relational Tables: quizzes • questions • scores</span>
+        </div>
+      </div>
+    </div>
+
+    <h2>Strict 4-Color Arcade Design System</h2>
+    <p>To ensure total visual consistency, every screen is rendered in four distinct vintage tones:</p>
+    <div class="palette-grid">
+      <div class="color-swatch" style="background-color: #360185; border-color: #8F0177;">
+        #360185<br>DEEP INDIGO
+      </div>
+      <div class="color-swatch" style="background-color: #8F0177; border-color: #F4B342;">
+        #8F0177<br>BORDEAUX PLUM
+      </div>
+      <div class="color-swatch" style="background-color: #DE1A58; border-color: #F4B342;">
+        #DE1A58<br>CRIMSON ROSE
+      </div>
+      <div class="color-swatch" style="background-color: #F4B342; color: #360185; border-color: #360185;">
+        #F4B342<br>VINTAGE GOLD
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>RETRO VINTAGE QUIZ ARCADE • ARCHITECTURE DOCUMENTATION</span>
+      <span>PAGE 2 OF 5</span>
+    </div>
+  </div>
+
+  <!-- ==================== PAGE 3: GAME & SCORING ENGINE ==================== -->
+  <div class="page">
+    <h1>
+      <svg class="symbol-icon" style="width: 18px; height: 18px;" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      2. REAL-TIME GAME &amp; SCORING ENGINE
+    </h1>
+
+    <h2>Deterministic Scoring Algorithm</h2>
+    <div class="formula-box">
+      EARNED_POINTS = Math.round((100 + SPEED_BONUS) * STREAK_MULTIPLIER)
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>COMPONENT</th>
+          <th>CALCULATION RULE</th>
+          <th>GAME MODE APPLICATION</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Base Points</strong></td>
+          <td>+100 PTS per correct answer</td>
+          <td>All Modes (Standard, Blitz, Practice, Sudden Death)</td>
+        </tr>
+        <tr>
+          <td><strong>Speed Bonus</strong></td>
+          <td>Remaining Seconds &times; 10 PTS</td>
+          <td>Standard (15s clock) &amp; Sudden Death (15s clock)</td>
+        </tr>
+        <tr>
+          <td><strong>Blitz Bonus</strong></td>
+          <td>Flat +30 PTS (+3s added to global clock)</td>
+          <td>Time Attack Blitz (60s global clock)</td>
+        </tr>
+        <tr>
+          <td><strong>Mistake Penalty</strong></td>
+          <td>0 PTS, Streak resets to 0 (-2s in Blitz)</td>
+          <td>Standard, Blitz, Practice. (Sudden Death: Game Over)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Streak Multipliers (Arcade Combo Scale)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>STREAK COUNT</th>
+          <th>MULTIPLIER</th>
+          <th>HUD BADGE &amp; SOUND EFFECT</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1 Question</td>
+          <td>1.0&times; (Base)</td>
+          <td>Normal Chime</td>
+        </tr>
+        <tr>
+          <td>2 – 3 Questions</td>
+          <td>1.2&times; (+20%)</td>
+          <td>COMBO x1.2!</td>
+        </tr>
+        <tr>
+          <td>4 – 5 Questions</td>
+          <td>1.5&times; (+50%)</td>
+          <td>MEGA COMBO x1.5!</td>
+        </tr>
+        <tr>
+          <td>6+ Questions</td>
+          <td>2.0&times; (+100% Double)</td>
+          <td>ULTRA STREAK x2.0! + High Tone Fanfare</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>State Synchronization &amp; Closure Prevention Architecture</h2>
+    <p>
+      In standard React state updates, calling asynchronous delays like <code>setTimeout</code> on the final question captures stale closure states, causing lost points on the results screen. The engine enforces <strong>Synchronous Mutable References</strong>:
+    </p>
+
+    <pre><code>// Synchronous Engine State in app/quiz/[id]/page.tsx
+const scoreRef = useRef(0);
+const streakRef = useRef(0);
+const maxStreakRef = useRef(0);
+const answersLogRef = useRef&lt;AnswerLogItem[]&gt;([]);
+const totalTimeSpentRef = useRef(0);
+
+// Answer Evaluation Execution (Synchronous Mutation)
+const handleAnswerSelect = (optionIndex: number) => {
+  if (isAnswerSubmitted) return;
+  const isCorrect = optionIndex === currentQ.correctOption;
+  if (isCorrect) {
+    streakRef.current += 1;
+    if (streakRef.current > maxStreakRef.current) maxStreakRef.current = streakRef.current;
+    const earned = Math.round((100 + timeBonus) * multiplier);
+    scoreRef.current += earned;
+  } else {
+    streakRef.current = 0;
+  }
+  answersLogRef.current.push(logEntry);
+  setScore(scoreRef.current); // React state updated exclusively for visual HUD
+};</code></pre>
+
+    <div class="page-footer">
+      <span>RETRO VINTAGE QUIZ ARCADE • ARCHITECTURE DOCUMENTATION</span>
+      <span>PAGE 3 OF 5</span>
+    </div>
+  </div>
+
+  <!-- ==================== PAGE 4: DATABASE SCHEMA & API ==================== -->
+  <div class="page">
+    <h1>
+      <svg class="symbol-icon" style="width: 18px; height: 18px;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 4.02 2 6.5v11C2 19.98 6.48 22 12 22s10-2.02 10-4.5v-11C22 4.02 17.52 2 12 2z M12 4c4.41 0 8 1.34 8 2.5S16.41 9 12 9 4 7.66 4 6.5 7.59 4 12 4z"/></svg>
+      3. CLOUD DATABASE &amp; API SPECIFICATION
+    </h1>
+
+    <h2>Neon PostgreSQL Normalized Schema</h2>
+    <pre><code>-- Quizzes Metadata Table
+CREATE TABLE IF NOT EXISTS quizzes (
+  id SERIAL PRIMARY KEY,
+  slug VARCHAR(100) UNIQUE NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  description TEXT NOT NULL,
+  category VARCHAR(50) NOT NULL,
+  icon VARCHAR(10) DEFAULT '🕹️',
+  difficulty VARCHAR(20) DEFAULT 'medium',
+  is_custom BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Questions Relational Child Table
+CREATE TABLE IF NOT EXISTS questions (
+  id SERIAL PRIMARY KEY,
+  quiz_id INT NOT NULL REFERENCES quizzes(id) ON DELETE CASCADE,
+  question_text TEXT NOT NULL,
+  code_snippet TEXT,
+  option_a TEXT NOT NULL, option_b TEXT NOT NULL, option_c TEXT NOT NULL, option_d TEXT NOT NULL,
+  correct_option INT NOT NULL CHECK (correct_option BETWEEN 0 AND 3),
+  explanation TEXT NOT NULL, difficulty VARCHAR(20) DEFAULT 'medium'
+);
+
+-- Leaderboard High Scores Table
+CREATE TABLE IF NOT EXISTS scores (
+  id SERIAL PRIMARY KEY, quiz_id INT, quiz_title VARCHAR(200), gamer_tag VARCHAR(50) NOT NULL,
+  score INT NOT NULL, accuracy INT NOT NULL, max_streak INT DEFAULT 0, game_mode VARCHAR(30) DEFAULT 'standard',
+  time_spent_seconds INT DEFAULT 0, played_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);</code></pre>
+
+    <h2>Serverless REST API Route Reference</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ENDPOINT</th>
+          <th>METHOD</th>
+          <th>DESCRIPTION</th>
+          <th>SAMPLE RESPONSE</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>/api/quizzes</code></td>
+          <td>GET</td>
+          <td>Fetches all active cartridges</td>
+          <td><code>{"quizzes":[{"id":1,"slug":"retro-tech",...}]}</code></td>
+        </tr>
+        <tr>
+          <td><code>/api/quizzes</code></td>
+          <td>POST</td>
+          <td>Creates new custom cartridge</td>
+          <td><code>{"success":true,"quiz":{"id":5,"slug":"..."}}</code></td>
+        </tr>
+        <tr>
+          <td><code>/api/quizzes/[id]</code></td>
+          <td>GET</td>
+          <td>Retrieves cartridge by slug/ID</td>
+          <td><code>{"quiz":{"id":1,"questions":[...]}}</code></td>
+        </tr>
+        <tr>
+          <td><code>/api/scores</code></td>
+          <td>GET</td>
+          <td>Returns top arcade leaderboard</td>
+          <td><code>{"scores":[{"gamerTag":"TEST_PILOT",...}]}</code></td>
+        </tr>
+        <tr>
+          <td><code>/api/scores</code></td>
+          <td>POST</td>
+          <td>Records validated player score</td>
+          <td><code>{"success":true,"score":{"id":6,"score":1980}}</code></td>
+        </tr>
+        <tr>
+          <td><code>/api/health</code></td>
+          <td>GET</td>
+          <td>Database connectivity inspector</td>
+          <td><code>{"status":"ok","database":{"connected":true}}</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Leaderboard Query with LEFT JOIN Resilience</h2>
+    <pre><code>SELECT s.id, s.quiz_id AS "quizId", COALESCE(q.title, s.quiz_title, 'Retro Cartridge') AS "quizTitle",
+       s.gamer_tag AS "gamerTag", s.score, s.accuracy, s.max_streak AS "maxStreak",
+       s.game_mode AS "gameMode", s.time_spent_seconds AS "timeSpentSeconds", s.played_at AS "playedAt"
+FROM scores s LEFT JOIN quizzes q ON s.quiz_id = q.id ORDER BY s.score DESC, s.played_at DESC LIMIT 50;</code></pre>
+
+    <div class="page-footer">
+      <span>RETRO VINTAGE QUIZ ARCADE • ARCHITECTURE DOCUMENTATION</span>
+      <span>PAGE 4 OF 5</span>
+    </div>
+  </div>
+
+  <!-- ==================== PAGE 5: DEPLOYMENT & OPERATIONS ==================== -->
+  <div class="page">
+    <h1>
+      <svg class="symbol-icon" style="width: 18px; height: 18px;" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>
+      4. DEPLOYMENT &amp; RUNTIME OPERATIONS
+    </h1>
+
+    <h2>Automated CI/CD Pipeline (GitHub &rarr; Vercel &rarr; Neon)</h2>
+    <ol style="font-size: 8.5pt;">
+      <li><strong>Git Push:</strong> Commit pushed to <code>https://github.com/RAFIRE-ESSE/retro-quiz.git</code>.</li>
+      <li><strong>Vercel Build:</strong> Webhook executes <code>npm run build</code>, running Next.js static tree-shaking and route compilation.</li>
+      <li><strong>Edge Execution:</strong> Serverless Route Handlers are provisioned in AWS us-east-1 data centers.</li>
+      <li><strong>Database Link:</strong> App reads <code>DATABASE_URL</code> and connects via <code>@neondatabase/serverless</code> over pooled HTTPS transport.</li>
+      <li><strong>Self-Healing Initialization:</strong> If database tables are fresh, <code>initNeonDatabase()</code> automatically creates all schemas and seeds the initial cartridges.</li>
+    </ol>
+
+    <h2>Required Environment Variables</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>VARIABLE</th>
+          <th>PURPOSE</th>
+          <th>ENVIRONMENT</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>DATABASE_URL</code></td>
+          <td>Neon Serverless PostgreSQL connection string</td>
+          <td>Production &amp; Development</td>
+        </tr>
+        <tr>
+          <td><code>POSTGRES_URL</code></td>
+          <td>Vercel Storage Postgres alias connection URL</td>
+          <td>Production (Auto-injected)</td>
+        </tr>
+        <tr>
+          <td><code>MSSQL_SERVER</code></td>
+          <td>(Optional) Microsoft SQL Server host for hybrid setups</td>
+          <td>Optional</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Operational Commands</h2>
+    <pre><code># 1. Install Dependencies
+npm install
+
+# 2. Run Local Development Server
+npm run dev
+
+# 3. Create Production Optimized Build
+npm run build
+
+# 4. Start Production Server
+npm start</code></pre>
+
+    <div class="retro-box plum-accent" style="margin-top: 15px;">
+      <div class="retro-box-title">
+        <svg class="symbol-icon" viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm0 3.45l8.28 14.55H3.72L12 5.45z M11 10h2v4h-2zm0 6h2v2h-2z"/></svg>
+        SYSTEM HEALTH VERIFICATION
+      </div>
+      <p style="font-size: 8.2pt;">
+        To verify live database connectivity at any time, perform a health check:<br>
+        <code>curl -s https://retro-quiz-ivory.vercel.app/api/health</code><br>
+        Expected status: <code>{"status":"ok","database":{"connected":true,"mode":"neon_postgres"}}</code>
+      </p>
+    </div>
+
+    <div class="page-footer">
+      <span>RETRO VINTAGE QUIZ ARCADE • ARCHITECTURE DOCUMENTATION</span>
+      <span>PAGE 5 OF 5</span>
+    </div>
+  </div>
+
+</body>
+</html>
