@@ -188,17 +188,37 @@ export default function QuizBuilderPage() {
 
   return (
     <div style={{ maxWidth: '820px', margin: '0 auto' }}>
-      {/* Marquee Header */}
-      <div className="retro-card" style={{ padding: '2rem 1.5rem', textAlign: 'center', marginBottom: '2rem', backgroundColor: 'var(--color-cream)' }}>
+      {/* Marquee Header - Strict 4 Colors */}
+      <div
+        className="retro-card"
+        style={{
+          padding: '2rem 1.5rem',
+          textAlign: 'center',
+          marginBottom: '2rem',
+          backgroundColor: '#360185',
+          borderColor: '#8F0177',
+          boxShadow: '6px 6px 0px #DE1A58',
+          color: '#F4B342'
+        }}
+      >
         <div style={{ display: 'inline-block', transform: 'rotate(-2deg)', marginBottom: '0.75rem' }}>
-          <span className="retro-sticker sticker-plum">★ CARTRIDGE LABORATORY ★</span>
+          <span
+            className="retro-sticker"
+            style={{
+              backgroundColor: '#DE1A58',
+              color: '#F4B342',
+              borderColor: '#F4B342'
+            }}
+          >
+            ★ CARTRIDGE LABORATORY ★
+          </span>
         </div>
 
-        <h1 style={{ fontSize: '2.4rem', fontWeight: 800, color: 'var(--color-plum)', marginBottom: '0.5rem' }}>
+        <h1 style={{ fontSize: '2.4rem', fontWeight: 800, color: '#F4B342', marginBottom: '0.5rem' }}>
           CUSTOM QUIZ CREATOR
         </h1>
 
-        <p style={{ color: 'var(--color-secondary)', fontSize: '1.05rem', fontWeight: 600 }}>
+        <p style={{ color: '#F4B342', fontSize: '1.05rem', fontWeight: 600, opacity: 0.95 }}>
           Craft your own trivia cartridge. Commit to MS SQL Server or export to JSON to share with friends.
         </p>
       </div>
@@ -209,8 +229,9 @@ export default function QuizBuilderPage() {
           style={{
             padding: '1rem',
             marginBottom: '1.5rem',
-            backgroundColor: statusMsg.type === 'success' ? 'var(--color-teal)' : 'var(--color-rose)',
-            color: statusMsg.type === 'success' ? '#0d382f' : '#fff',
+            backgroundColor: statusMsg.type === 'success' ? '#8F0177' : '#DE1A58',
+            borderColor: '#F4B342',
+            color: '#F4B342',
             fontWeight: 'bold',
             textAlign: 'center'
           }}
@@ -220,14 +241,24 @@ export default function QuizBuilderPage() {
       )}
 
       {/* Cartridge Info Card */}
-      <div className="retro-card" style={{ padding: '1.75rem', marginBottom: '2rem' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-plum)', marginBottom: '1.25rem' }}>
+      <div
+        className="retro-card"
+        style={{
+          padding: '1.75rem',
+          marginBottom: '2rem',
+          backgroundColor: '#360185',
+          borderColor: '#8F0177',
+          boxShadow: '6px 6px 0px #DE1A58',
+          color: '#F4B342'
+        }}
+      >
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#F4B342', marginBottom: '1.25rem' }}>
           1. CARTRIDGE DETAILS
         </h2>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px', gap: '1rem', marginBottom: '1rem' }}>
           <div>
-            <label style={{ display: 'block', fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-plum)', marginBottom: '0.35rem' }}>
+            <label style={{ display: 'block', fontWeight: 700, fontSize: '0.9rem', color: '#F4B342', marginBottom: '0.35rem' }}>
               Cartridge Title
             </label>
             <input
@@ -238,16 +269,18 @@ export default function QuizBuilderPage() {
               style={{
                 width: '100%',
                 padding: '0.75rem',
-                border: '2.5px solid var(--border-main)',
+                border: '2.5px solid #F4B342',
                 borderRadius: '6px',
                 fontSize: '1rem',
-                backgroundColor: 'var(--card-bg)'
+                backgroundColor: '#8F0177',
+                color: '#F4B342',
+                outline: 'none'
               }}
             />
           </div>
 
           <div>
-            <label style={{ display: 'block', fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-plum)', marginBottom: '0.35rem' }}>
+            <label style={{ display: 'block', fontWeight: 700, fontSize: '0.9rem', color: '#F4B342', marginBottom: '0.35rem' }}>
               Icon
             </label>
             <input
@@ -257,18 +290,20 @@ export default function QuizBuilderPage() {
               style={{
                 width: '100%',
                 padding: '0.75rem',
-                border: '2.5px solid var(--border-main)',
+                border: '2.5px solid #F4B342',
                 borderRadius: '6px',
                 fontSize: '1.2rem',
                 textAlign: 'center',
-                backgroundColor: 'var(--card-bg)'
+                backgroundColor: '#8F0177',
+                color: '#F4B342',
+                outline: 'none'
               }}
             />
           </div>
         </div>
 
         <div>
-          <label style={{ display: 'block', fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-plum)', marginBottom: '0.35rem' }}>
+          <label style={{ display: 'block', fontWeight: 700, fontSize: '0.9rem', color: '#F4B342', marginBottom: '0.35rem' }}>
             Description
           </label>
           <input
@@ -279,10 +314,12 @@ export default function QuizBuilderPage() {
             style={{
               width: '100%',
               padding: '0.75rem',
-              border: '2.5px solid var(--border-main)',
+              border: '2.5px solid #F4B342',
               borderRadius: '6px',
               fontSize: '0.95rem',
-              backgroundColor: 'var(--card-bg)'
+              backgroundColor: '#8F0177',
+              color: '#F4B342',
+              outline: 'none'
             }}
           />
         </div>
@@ -291,7 +328,7 @@ export default function QuizBuilderPage() {
       {/* Questions List */}
       <div style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-plum)' }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#360185' }}>
             2. QUESTIONS ({questions.length})
           </h2>
 
@@ -306,7 +343,7 @@ export default function QuizBuilderPage() {
             />
             <button
               type="button"
-              className="retro-btn retro-btn-cream"
+              className="retro-btn retro-btn-gold"
               style={{ fontSize: '0.85rem', padding: '0.4rem 0.8rem' }}
               onClick={() => fileInputRef.current?.click()}
             >
@@ -314,7 +351,7 @@ export default function QuizBuilderPage() {
             </button>
             <button
               type="button"
-              className="retro-btn retro-btn-cream"
+              className="retro-btn retro-btn-gold"
               style={{ fontSize: '0.85rem', padding: '0.4rem 0.8rem' }}
               onClick={handleExportJSON}
             >
@@ -324,15 +361,40 @@ export default function QuizBuilderPage() {
         </div>
 
         {questions.map((q, qIdx) => (
-          <div key={qIdx} className="retro-card" style={{ padding: '1.75rem', marginBottom: '1.5rem', backgroundColor: '#fffdf5' }}>
+          <div
+            key={qIdx}
+            className="retro-card"
+            style={{
+              padding: '1.75rem',
+              marginBottom: '1.5rem',
+              backgroundColor: '#360185',
+              borderColor: '#8F0177',
+              boxShadow: '4px 4px 0px #DE1A58',
+              color: '#F4B342'
+            }}
+          >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <span className="retro-sticker sticker-rose" style={{ fontSize: '0.85rem' }}>
+              <span
+                className="retro-sticker"
+                style={{
+                  fontSize: '0.85rem',
+                  backgroundColor: '#8F0177',
+                  color: '#F4B342',
+                  borderColor: '#F4B342'
+                }}
+              >
                 QUESTION #{qIdx + 1}
               </span>
               <button
                 type="button"
-                className="retro-btn retro-btn-cream"
-                style={{ padding: '0.25rem 0.65rem', fontSize: '0.8rem', color: '#b91c1c' }}
+                className="retro-btn"
+                style={{
+                  padding: '0.25rem 0.65rem',
+                  fontSize: '0.8rem',
+                  backgroundColor: '#DE1A58',
+                  color: '#F4B342',
+                  borderColor: '#F4B342'
+                }}
                 onClick={() => handleRemoveQuestion(qIdx)}
               >
                 ✕ Remove
@@ -340,7 +402,7 @@ export default function QuizBuilderPage() {
             </div>
 
             <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', fontWeight: 700, fontSize: '0.88rem', color: 'var(--color-plum)', marginBottom: '0.35rem' }}>
+              <label style={{ display: 'block', fontWeight: 700, fontSize: '0.88rem', color: '#F4B342', marginBottom: '0.35rem' }}>
                 Question Text
               </label>
               <input
@@ -351,15 +413,17 @@ export default function QuizBuilderPage() {
                 style={{
                   width: '100%',
                   padding: '0.65rem',
-                  border: '2px solid var(--border-main)',
+                  border: '2px solid #F4B342',
                   borderRadius: '6px',
-                  backgroundColor: 'var(--card-bg)'
+                  backgroundColor: '#8F0177',
+                  color: '#F4B342',
+                  outline: 'none'
                 }}
               />
             </div>
 
             <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', fontWeight: 700, fontSize: '0.88rem', color: 'var(--color-plum)', marginBottom: '0.35rem' }}>
+              <label style={{ display: 'block', fontWeight: 700, fontSize: '0.88rem', color: '#F4B342', marginBottom: '0.35rem' }}>
                 Optional Code Snippet or ASCII Art
               </label>
               <textarea
@@ -370,17 +434,18 @@ export default function QuizBuilderPage() {
                 style={{
                   width: '100%',
                   padding: '0.65rem',
-                  border: '2px solid var(--border-main)',
+                  border: '2px solid #DE1A58',
                   borderRadius: '6px',
                   fontFamily: 'monospace',
-                  backgroundColor: '#210d15',
-                  color: '#72BAA9'
+                  backgroundColor: '#360185',
+                  color: '#F4B342',
+                  outline: 'none'
                 }}
               />
             </div>
 
             <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', fontWeight: 700, fontSize: '0.88rem', color: 'var(--color-plum)', marginBottom: '0.35rem' }}>
+              <label style={{ display: 'block', fontWeight: 700, fontSize: '0.88rem', color: '#F4B342', marginBottom: '0.35rem' }}>
                 Options (Select Radio Button for Correct Answer)
               </label>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.65rem' }}>
@@ -391,10 +456,11 @@ export default function QuizBuilderPage() {
                       display: 'flex',
                       alignItems: 'center',
                       gap: '0.5rem',
-                      backgroundColor: q.correctOption === optIdx ? 'var(--color-teal)' : 'var(--card-bg)',
-                      border: '2px solid var(--border-main)',
+                      backgroundColor: q.correctOption === optIdx ? '#DE1A58' : '#8F0177',
+                      border: '2px solid #F4B342',
                       borderRadius: '6px',
-                      padding: '0.4rem 0.65rem'
+                      padding: '0.4rem 0.65rem',
+                      color: '#F4B342'
                     }}
                   >
                     <input
@@ -402,9 +468,9 @@ export default function QuizBuilderPage() {
                       name={`correct_${qIdx}`}
                       checked={q.correctOption === optIdx}
                       onChange={() => handleQuestionFieldChange(qIdx, 'correctOption', optIdx)}
-                      style={{ accentColor: 'var(--color-plum)', width: '18px', height: '18px' }}
+                      style={{ accentColor: '#F4B342', width: '18px', height: '18px' }}
                     />
-                    <span style={{ fontWeight: 800, color: 'var(--color-plum)' }}>
+                    <span style={{ fontWeight: 800, color: '#F4B342' }}>
                       {String.fromCharCode(65 + optIdx)}:
                     </span>
                     <input
@@ -417,7 +483,8 @@ export default function QuizBuilderPage() {
                         border: 'none',
                         background: 'transparent',
                         outline: 'none',
-                        fontSize: '0.95rem'
+                        fontSize: '0.95rem',
+                        color: '#F4B342'
                       }}
                     />
                   </div>
@@ -426,7 +493,7 @@ export default function QuizBuilderPage() {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontWeight: 700, fontSize: '0.88rem', color: 'var(--color-plum)', marginBottom: '0.35rem' }}>
+              <label style={{ display: 'block', fontWeight: 700, fontSize: '0.88rem', color: '#F4B342', marginBottom: '0.35rem' }}>
                 Historical Rationale / Explanation
               </label>
               <input
@@ -437,9 +504,11 @@ export default function QuizBuilderPage() {
                 style={{
                   width: '100%',
                   padding: '0.65rem',
-                  border: '2px solid var(--border-main)',
+                  border: '2px solid #F4B342',
                   borderRadius: '6px',
-                  backgroundColor: 'var(--card-bg)',
+                  backgroundColor: '#8F0177',
+                  color: '#F4B342',
+                  outline: 'none',
                   fontSize: '0.9rem'
                 }}
               />
@@ -449,7 +518,7 @@ export default function QuizBuilderPage() {
 
         <button
           type="button"
-          className="retro-btn retro-btn-cream"
+          className="retro-btn retro-btn-gold"
           style={{ width: '100%', padding: '0.85rem' }}
           onClick={handleAddQuestion}
         >
@@ -458,11 +527,20 @@ export default function QuizBuilderPage() {
       </div>
 
       {/* Save & Submit */}
-      <div className="retro-card" style={{ padding: '1.75rem', textAlign: 'center', backgroundColor: 'var(--color-cream)' }}>
+      <div
+        className="retro-card"
+        style={{
+          padding: '1.75rem',
+          textAlign: 'center',
+          backgroundColor: '#360185',
+          borderColor: '#8F0177',
+          boxShadow: '6px 6px 0px #DE1A58'
+        }}
+      >
         <button
           type="button"
           disabled={saving}
-          className="retro-btn retro-btn-plum"
+          className="retro-btn retro-btn-gold"
           style={{ padding: '0.85rem 2rem', fontSize: '1.15rem' }}
           onClick={handleSaveToDatabase}
         >

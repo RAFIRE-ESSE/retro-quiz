@@ -260,34 +260,68 @@ function QuizPlayContent() {
 
   return (
     <div style={{ maxWidth: '780px', margin: '0 auto' }}>
-      {/* Top Arcade Status Bar */}
-      <div className="retro-card" style={{ padding: '0.85rem 1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', backgroundColor: 'var(--card-bg)' }}>
+      {/* Top Arcade Status Bar - Strict 4 Colors */}
+      <div
+        className="retro-card"
+        style={{
+          padding: '0.85rem 1.25rem',
+          marginBottom: '1.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '0.75rem',
+          backgroundColor: '#360185',
+          borderColor: '#8F0177',
+          boxShadow: '4px 4px 0px #DE1A58',
+          color: '#F4B342'
+        }}
+      >
         <div>
-          <span className="retro-sticker sticker-plum" style={{ fontSize: '0.9rem' }}>
+          <span
+            className="retro-sticker"
+            style={{
+              fontSize: '0.9rem',
+              backgroundColor: '#8F0177',
+              color: '#F4B342',
+              borderColor: '#F4B342'
+            }}
+          >
             {quiz.title}
           </span>
-          <span className="font-arcade" style={{ marginLeft: '0.75rem', fontSize: '1.15rem', color: 'var(--color-rose)' }}>
+          <span className="font-arcade" style={{ marginLeft: '0.75rem', fontSize: '1.15rem', color: '#DE1A58' }}>
             TAG: {gamerTag}
           </span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           {/* Streak Counter */}
-          <div className="font-arcade" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '1.35rem', color: streak >= 2 ? 'var(--color-plum)' : 'var(--text-muted)' }}>
+          <div className="font-arcade" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '1.35rem', color: '#F4B342' }}>
             <RetroFlameIcon size={20} />
             <span>{streak}x STREAK</span>
           </div>
 
           {/* Score Counter */}
-          <div className="font-arcade" style={{ fontSize: '1.6rem', color: 'var(--color-plum)', fontWeight: 'bold' }}>
+          <div className="font-arcade" style={{ fontSize: '1.6rem', color: '#F4B342', fontWeight: 'bold' }}>
             SCORE: {score}
           </div>
 
           {/* Timer Clock */}
           {gameMode !== 'practice' && (
             <div
-              className={`retro-sticker ${timeRemaining <= 4 ? 'sticker-rose animate-pulse-retro' : 'sticker-teal'}`}
-              style={{ fontSize: '1.25rem', minWidth: '85px', textAlign: 'center', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}
+              className={`retro-sticker ${timeRemaining <= 4 ? 'animate-pulse-retro' : ''}`}
+              style={{
+                fontSize: '1.25rem',
+                minWidth: '85px',
+                textAlign: 'center',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.35rem',
+                backgroundColor: '#DE1A58',
+                color: '#F4B342',
+                borderColor: '#F4B342'
+              }}
             >
               <RetroClockIcon size={18} />
               <span>{timeRemaining}s</span>
@@ -298,7 +332,7 @@ function QuizPlayContent() {
 
       {/* Progress Bar */}
       <div style={{ marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem', fontSize: '0.88rem', fontWeight: 700, color: 'var(--color-plum)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem', fontSize: '0.88rem', fontWeight: 700, color: '#360185' }}>
           <span>QUESTION {currentIndex + 1} OF {questions.length}</span>
           <span>{Math.round(((currentIndex + 1) / questions.length) * 100)}% COMPLETE</span>
         </div>
@@ -310,9 +344,19 @@ function QuizPlayContent() {
         </div>
       </div>
 
-      {/* Main Question Card */}
-      <div className="retro-card" style={{ padding: '2rem 1.75rem', marginBottom: '1.5rem' }}>
-        <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--color-plum)', lineHeight: 1.35, marginBottom: '1rem' }}>
+      {/* Main Question Card - Strict 4 Colors */}
+      <div
+        className="retro-card"
+        style={{
+          padding: '2rem 1.75rem',
+          marginBottom: '1.5rem',
+          backgroundColor: '#360185',
+          borderColor: '#8F0177',
+          boxShadow: '6px 6px 0px #DE1A58',
+          color: '#F4B342'
+        }}
+      >
+        <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#F4B342', lineHeight: 1.35, marginBottom: '1rem' }}>
           {currentQ.questionText}
         </h2>
 
@@ -326,23 +370,23 @@ function QuizPlayContent() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginTop: '1.5rem' }}>
           {currentQ.options.map((opt, idx) => {
             let btnStyle = {
-              backgroundColor: 'var(--card-bg)',
-              borderColor: 'var(--border-main)',
-              color: 'var(--text-primary)'
+              backgroundColor: '#8F0177',
+              borderColor: '#F4B342',
+              color: '#F4B342'
             };
 
             if (isAnswerSubmitted) {
               if (idx === currentQ.correctOption) {
                 btnStyle = {
-                  backgroundColor: 'var(--color-teal)',
-                  borderColor: 'var(--border-main)',
-                  color: '#0d2820'
+                  backgroundColor: '#F4B342',
+                  borderColor: '#DE1A58',
+                  color: '#360185'
                 };
               } else if (idx === selectedOption) {
                 btnStyle = {
-                  backgroundColor: 'var(--color-rose)',
-                  borderColor: 'var(--border-main)',
-                  color: '#fff'
+                  backgroundColor: '#DE1A58',
+                  borderColor: '#F4B342',
+                  color: '#F4B342'
                 };
               }
             }
@@ -368,8 +412,9 @@ function QuizPlayContent() {
                   style={{
                     width: '32px',
                     height: '32px',
-                    backgroundColor: 'var(--color-plum)',
-                    color: '#fff',
+                    backgroundColor: '#360185',
+                    color: '#F4B342',
+                    border: '1.5px solid #F4B342',
                     borderRadius: '4px',
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -392,15 +437,16 @@ function QuizPlayContent() {
             style={{
               marginTop: '1.5rem',
               padding: '1.25rem',
-              backgroundColor: 'var(--color-cream)',
-              border: '2.5px solid var(--border-main)',
-              borderRadius: '6px'
+              backgroundColor: '#8F0177',
+              border: '2.5px solid #F4B342',
+              borderRadius: '6px',
+              color: '#F4B342'
             }}
           >
-            <div style={{ fontWeight: 800, color: 'var(--color-plum)', marginBottom: '0.4rem', fontSize: '1rem' }}>
+            <div style={{ fontWeight: 800, color: '#F4B342', marginBottom: '0.4rem', fontSize: '1rem' }}>
               💡 HISTORICAL RATIONALE:
             </div>
-            <div style={{ color: 'var(--color-secondary)', fontSize: '0.95rem', lineHeight: 1.5 }}>
+            <div style={{ color: '#F4B342', fontSize: '0.95rem', lineHeight: 1.5, opacity: 0.95 }}>
               {currentQ.explanation}
             </div>
           </div>
@@ -411,7 +457,7 @@ function QuizPlayContent() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <button
           type="button"
-          className="retro-btn retro-btn-cream"
+          className="retro-btn retro-btn-gold"
           style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
           onClick={() => {
             if (confirm('Exit quiz? Current score will be lost.')) {
@@ -425,7 +471,7 @@ function QuizPlayContent() {
         {isAnswerSubmitted && gameMode === 'practice' && (
           <button
             type="button"
-            className="retro-btn retro-btn-plum"
+            className="retro-btn retro-btn-gold"
             onClick={advanceQuestion}
             style={{ fontSize: '1rem', padding: '0.6rem 1.5rem' }}
           >

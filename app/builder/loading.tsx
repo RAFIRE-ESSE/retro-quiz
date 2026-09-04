@@ -22,7 +22,9 @@ export default function BuilderLoading() {
           maxWidth: '520px',
           width: '100%',
           padding: '2.5rem 2rem',
-          backgroundColor: 'var(--color-cream)',
+          backgroundColor: '#360185',
+          borderColor: '#8F0177',
+          boxShadow: '6px 6px 0px #DE1A58',
           textAlign: 'center'
         }}
       >
@@ -31,7 +33,15 @@ export default function BuilderLoading() {
         </div>
 
         <div style={{ display: 'inline-block', transform: 'rotate(-2deg)', marginBottom: '0.75rem' }}>
-          <span className="retro-sticker sticker-rose" style={{ fontSize: '0.95rem' }}>
+          <span
+            className="retro-sticker"
+            style={{
+              fontSize: '0.95rem',
+              backgroundColor: '#DE1A58',
+              color: '#F4B342',
+              borderColor: '#F4B342'
+            }}
+          >
             ★ LABORATORY WORKBENCH ★
           </span>
         </div>
@@ -40,7 +50,7 @@ export default function BuilderLoading() {
           className="font-arcade"
           style={{
             fontSize: '2.2rem',
-            color: 'var(--color-plum)',
+            color: '#F4B342',
             letterSpacing: '0.04em',
             marginBottom: '1rem'
           }}
@@ -50,30 +60,30 @@ export default function BuilderLoading() {
 
         <div
           style={{
-            backgroundColor: '#210d15',
-            border: '2.5px solid var(--border-main)',
+            backgroundColor: '#8F0177',
+            border: '2.5px solid #DE1A58',
             borderRadius: '6px',
             padding: '0.75rem 1rem',
             marginBottom: '1rem',
-            boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.5)'
+            boxShadow: 'inset 2px 2px 0px #360185'
           }}
         >
           <div
             className="font-arcade"
             style={{
-              color: 'var(--color-teal)',
+              color: '#F4B342',
               fontSize: '1.4rem',
-              letterSpacing: '0.12em'
+              letterSpacing: '0.15em'
             }}
           >
-            PREPARING DRAFTING TOOLS ■■■■■■■□□□
+            ■■■■■■■■■■□□□□
           </div>
         </div>
 
         <p
           className="font-arcade"
           style={{
-            color: 'var(--color-rose)',
+            color: '#DE1A58',
             fontSize: '1.15rem'
           }}
         >

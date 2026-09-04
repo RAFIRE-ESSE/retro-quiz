@@ -1,35 +1,67 @@
 /* =====================================================================
    Retro Vintage Quiz - Global Stylesheet
-   Color Palette:
-     - #934761 (Deep Vintage Plum / Bordeaux)
-     - #AD5C71 (Muted Rose / Mauve)
-     - #72BAA9 (Retro Teal / Sage Mint)
-     - #D5E7B5 (Pistachio / Vintage Cream)
+   Strict 4-Color Master Palette:
+     - #360185 (Deep Retro Indigo / Cosmic Violet)
+     - #8F0177 (Vibrant Retro Magenta / Fuchsia)
+     - #DE1A58 (Electric Crimson / Hot Rose)
+     - #F4B342 (Arcade Goldenrod / Retro Amber)
    ===================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=VT323&display=swap');
 
 :root {
-  --color-plum: #934761;
-  --color-rose: #AD5C71;
-  --color-teal: #72BAA9;
-  --color-cream: #D5E7B5;
+  /* Prevent browser forced-dark mode overrides */
+  color-scheme: light only !important;
+  forced-color-adjust: none !important;
 
-  /* Theme mappings */
-  --bg-page: #D5E7B5;
-  --card-bg: #f7fbe9;
-  --text-primary: #3b1422;
-  --text-secondary: #632e3e;
-  --text-muted: #8a5062;
-  --border-main: #934761;
-  --shadow-color: #934761;
+  /* Master 4 Colors */
+  --c-indigo: #360185;
+  --c-magenta: #8F0177;
+  --c-crimson: #DE1A58;
+  --c-gold: #F4B342;
+
+  /* Aliases */
+  --color-indigo: #360185;
+  --color-magenta: #8F0177;
+  --color-crimson: #DE1A58;
+  --color-gold: #F4B342;
+
+  --color-plum: #360185;
+  --color-rose: #8F0177;
+  --color-teal: #DE1A58;
+  --color-cream: #F4B342;
+
+  /* Theme mappings - strictly using the 4 colors */
+  --bg-page: #F4B342;
+  --card-bg: #360185;
+  --card-alt: #8F0177;
+  --text-primary: #F4B342;
+  --text-secondary: #F4B342;
+  --text-dark: #360185;
+  --border-main: #8F0177;
+  --border-accent: #DE1A58;
+  --shadow-color: #360185;
 
   --font-heading: 'Space Grotesk', -apple-system, sans-serif;
   --font-retro: 'VT323', monospace;
   
-  --shadow-retro: 4px 4px 0px var(--shadow-color);
-  --shadow-retro-lg: 6px 6px 0px var(--shadow-color);
-  --shadow-retro-sm: 2px 2px 0px var(--shadow-color);
+  --shadow-retro: 4px 4px 0px #360185;
+  --shadow-retro-lg: 6px 6px 0px #360185;
+  --shadow-retro-sm: 2px 2px 0px #360185;
+}
+
+html, body {
+  color-scheme: light only !important;
+  forced-color-adjust: none !important;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root, html, body {
+    color-scheme: light only !important;
+    background-color: #F4B342 !important;
+    color: #360185 !important;
+  }
 }
 
 *, *::before, *::after {
@@ -40,33 +72,19 @@
 
 body {
   font-family: var(--font-heading);
-  background-color: var(--bg-page);
-  color: var(--text-primary);
+  background-color: #F4B342;
+  color: #360185;
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
   line-height: 1.5;
 
-  /* Subtle vintage paper/grain texture */
+  /* Retro halftone dot texture using exclusively #8F0177 and #360185 */
   background-image: 
-    radial-gradient(var(--color-rose) 0.75px, transparent 0.75px),
-    radial-gradient(var(--color-plum) 0.75px, var(--bg-page) 0.75px);
-  background-size: 30px 30px;
-  background-position: 0 0, 15px 15px;
-  background-opacity: 0.15;
-}
-
-/* CRT Scanlines Layer (Toggled via body.crt-active) */
-body.crt-active::after {
-  content: " ";
-  display: block;
-  position: fixed;
-  top: 0; left: 0; bottom: 0; right: 0;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
-  background-size: 100% 4px;
-  z-index: 999;
-  pointer-events: none;
-  opacity: 0.6;
+    radial-gradient(#8F0177 1px, transparent 1px),
+    radial-gradient(#360185 1px, #F4B342 1px);
+  background-size: 24px 24px;
+  background-position: 0 0, 12px 12px;
 }
 
 /* Container */
@@ -76,22 +94,23 @@ body.crt-active::after {
   padding: 1.5rem 1rem 4rem;
 }
 
-/* Retro Chunky Cards */
+/* Retro Chunky Cards - Bold Indigo surface with Magenta border */
 .retro-card {
-  background-color: var(--card-bg);
-  border: 3.5px solid var(--border-main);
+  background-color: #360185;
+  color: #F4B342;
+  border: 3.5px solid #8F0177;
   border-radius: 8px;
-  box-shadow: var(--shadow-retro);
+  box-shadow: 4px 4px 0px #360185;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   position: relative;
 }
 
 .retro-card-interactive:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px var(--shadow-color);
+  box-shadow: 6px 6px 0px #DE1A58;
 }
 
-/* Retro Buttons */
+/* Retro Buttons - strictly 4 colors */
 .retro-btn {
   display: inline-flex;
   align-items: center;
@@ -102,52 +121,64 @@ body.crt-active::after {
   font-weight: 700;
   font-size: 1rem;
   text-decoration: none;
-  border: 3px solid var(--border-main);
+  border: 3px solid #360185;
   border-radius: 6px;
-  box-shadow: var(--shadow-retro);
+  box-shadow: 3px 3px 0px #360185;
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
   user-select: none;
 }
 
 .retro-btn:active {
-  transform: translate(3px, 3px);
-  box-shadow: 1px 1px 0px var(--shadow-color);
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #360185;
 }
 
-.retro-btn-plum {
-  background-color: var(--color-plum);
-  color: #fff;
+/* Indigo button */
+.retro-btn-plum, .retro-btn-indigo {
+  background-color: #360185;
+  color: #F4B342;
+  border-color: #F4B342;
 }
-.retro-btn-plum:hover {
-  background-color: #803d54;
-}
-
-.retro-btn-teal {
-  background-color: var(--color-teal);
-  color: #16362e;
-}
-.retro-btn-teal:hover {
-  background-color: #61a696;
+.retro-btn-plum:hover, .retro-btn-indigo:hover {
+  background-color: #8F0177;
+  color: #F4B342;
 }
 
-.retro-btn-rose {
-  background-color: var(--color-rose);
-  color: #fff;
+/* Crimson button */
+.retro-btn-teal, .retro-btn-crimson {
+  background-color: #DE1A58;
+  color: #F4B342;
+  border-color: #360185;
 }
-.retro-btn-rose:hover {
-  background-color: #9c4f63;
-}
-
-.retro-btn-cream {
-  background-color: var(--color-cream);
-  color: var(--color-plum);
-}
-.retro-btn-cream:hover {
-  background-color: #c5d9a1;
+.retro-btn-teal:hover, .retro-btn-crimson:hover {
+  background-color: #8F0177;
+  color: #F4B342;
 }
 
-/* Sticker Tags */
+/* Magenta button */
+.retro-btn-rose, .retro-btn-magenta {
+  background-color: #8F0177;
+  color: #F4B342;
+  border-color: #F4B342;
+}
+.retro-btn-rose:hover, .retro-btn-magenta:hover {
+  background-color: #DE1A58;
+  color: #F4B342;
+}
+
+/* Gold button */
+.retro-btn-cream, .retro-btn-gold {
+  background-color: #F4B342;
+  color: #360185;
+  border-color: #360185;
+}
+.retro-btn-cream:hover, .retro-btn-gold:hover {
+  background-color: #DE1A58;
+  color: #F4B342;
+}
+
+/* Sticker Tags - strictly 4 colors */
 .retro-sticker {
   display: inline-block;
   padding: 0.25rem 0.75rem;
@@ -156,29 +187,33 @@ body.crt-active::after {
   letter-spacing: 0.05em;
   text-transform: uppercase;
   font-weight: bold;
-  border: 2px solid var(--border-main);
+  border: 2px solid #F4B342;
   border-radius: 4px;
-  box-shadow: var(--shadow-retro-sm);
+  box-shadow: 2px 2px 0px #360185;
 }
 
-.sticker-plum {
-  background-color: var(--color-plum);
-  color: var(--color-cream);
+.sticker-plum, .sticker-indigo {
+  background-color: #360185;
+  color: #F4B342;
+  border-color: #F4B342;
 }
 
-.sticker-teal {
-  background-color: var(--color-teal);
-  color: #102d25;
+.sticker-teal, .sticker-crimson {
+  background-color: #DE1A58;
+  color: #F4B342;
+  border-color: #360185;
 }
 
-.sticker-rose {
-  background-color: var(--color-rose);
-  color: #fff;
+.sticker-rose, .sticker-magenta {
+  background-color: #8F0177;
+  color: #F4B342;
+  border-color: #F4B342;
 }
 
-.sticker-cream {
-  background-color: var(--color-cream);
-  color: var(--color-plum);
+.sticker-cream, .sticker-gold {
+  background-color: #F4B342;
+  color: #360185;
+  border-color: #360185;
 }
 
 /* Arcade Typography */
@@ -187,11 +222,11 @@ body.crt-active::after {
   letter-spacing: 0.04em;
 }
 
-/* Code Snippet Box */
+/* Code Snippet Box (Strict 4 Colors) */
 .retro-code-box {
-  background-color: #210d15;
-  color: #72BAA9;
-  border: 2.5px solid var(--border-main);
+  background-color: #360185;
+  color: #F4B342;
+  border: 2.5px solid #DE1A58;
   border-radius: 6px;
   padding: 1rem;
   font-family: 'Courier New', Courier, monospace;
@@ -199,23 +234,23 @@ body.crt-active::after {
   overflow-x: auto;
   white-space: pre-wrap;
   margin: 1rem 0;
-  box-shadow: inset 2px 2px 4px rgba(0,0,0,0.5);
+  box-shadow: inset 2px 2px 0px #360185;
 }
 
 /* Progress bar retro */
 .retro-progress-track {
   height: 14px;
-  background-color: #ebd7be;
-  border: 2.5px solid var(--border-main);
+  background-color: #360185;
+  border: 2.5px solid #F4B342;
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
+  box-shadow: inset 1px 1px 0px #360185;
 }
 
 .retro-progress-fill {
   height: 100%;
-  background-color: var(--color-teal);
-  border-right: 2px solid var(--border-main);
+  background-color: #DE1A58;
+  border-right: 2px solid #F4B342;
   transition: width 0.3s ease;
 }
 

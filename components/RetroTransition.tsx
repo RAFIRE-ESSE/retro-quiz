@@ -105,8 +105,8 @@ export function RetroTransitionProvider({ children }: { children: React.ReactNod
             left: 0,
             width: `${progress}%`,
             height: '5px',
-            backgroundColor: 'var(--color-teal)',
-            boxShadow: '0 0 10px var(--color-teal)',
+            backgroundColor: '#DE1A58',
+            boxShadow: '0 0 10px #DE1A58',
             zIndex: 99999,
             transition: 'width 0.2s ease-out'
           }}
@@ -119,8 +119,8 @@ export function RetroTransitionProvider({ children }: { children: React.ReactNod
           style={{
             position: 'fixed',
             inset: 0,
-            backgroundColor: 'rgba(59, 20, 34, 0.75)',
-            backdropFilter: 'blur(3px)',
+            backgroundColor: '#360185e6',
+            backdropFilter: 'blur(4px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -133,10 +133,11 @@ export function RetroTransitionProvider({ children }: { children: React.ReactNod
             style={{
               padding: '2rem 2.5rem',
               textAlign: 'center',
-              backgroundColor: 'var(--color-cream)',
+              backgroundColor: '#360185',
+              borderColor: '#8F0177',
               maxWidth: '420px',
               width: '90%',
-              boxShadow: '8px 8px 0px #000'
+              boxShadow: '8px 8px 0px #DE1A58'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }} className="animate-pulse-retro">
@@ -144,7 +145,15 @@ export function RetroTransitionProvider({ children }: { children: React.ReactNod
             </div>
 
             <div style={{ display: 'inline-block', transform: 'rotate(-2deg)', marginBottom: '0.75rem' }}>
-              <span className="retro-sticker sticker-plum" style={{ fontSize: '0.9rem' }}>
+              <span
+                className="retro-sticker"
+                style={{
+                  fontSize: '0.9rem',
+                  backgroundColor: '#DE1A58',
+                  color: '#F4B342',
+                  borderColor: '#F4B342'
+                }}
+              >
                 ★ SWITCHING CARTRIDGE ★
               </span>
             </div>
@@ -153,7 +162,7 @@ export function RetroTransitionProvider({ children }: { children: React.ReactNod
               className="font-arcade"
               style={{
                 fontSize: '1.8rem',
-                color: 'var(--color-plum)',
+                color: '#F4B342',
                 letterSpacing: '0.04em',
                 marginBottom: '0.85rem'
               }}
@@ -164,11 +173,11 @@ export function RetroTransitionProvider({ children }: { children: React.ReactNod
             {/* Block progress indicator */}
             <div
               style={{
-                backgroundColor: '#210d15',
-                border: '2px solid var(--border-main)',
+                backgroundColor: '#8F0177',
+                border: '2px solid #DE1A58',
                 borderRadius: '4px',
                 padding: '0.5rem',
-                color: 'var(--color-teal)',
+                color: '#F4B342',
                 fontSize: '1.2rem',
                 fontFamily: 'var(--font-retro)',
                 letterSpacing: '0.12em'

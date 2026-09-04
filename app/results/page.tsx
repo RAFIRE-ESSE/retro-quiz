@@ -49,7 +49,7 @@ export default function ResultsPage() {
             particleCount: 120,
             spread: 70,
             origin: { y: 0.6 },
-            colors: ['#934761', '#AD5C71', '#72BAA9', '#D5E7B5']
+            colors: ['#360185', '#8F0177', '#DE1A58', '#F4B342']
           });
         }
 
@@ -102,60 +102,88 @@ export default function ResultsPage() {
 
   return (
     <div style={{ maxWidth: '820px', margin: '0 auto' }}>
-      {/* Certificate Header Card */}
-      <div className="retro-card" style={{ padding: '2.5rem 1.5rem', textAlign: 'center', marginBottom: '2rem', backgroundColor: 'var(--color-cream)' }}>
+      {/* Certificate Header Card - Strict 4 Colors */}
+      <div
+        className="retro-card"
+        style={{
+          padding: '2.5rem 1.5rem',
+          textAlign: 'center',
+          marginBottom: '2rem',
+          backgroundColor: '#360185',
+          borderColor: '#8F0177',
+          boxShadow: '6px 6px 0px #DE1A58',
+          color: '#F4B342'
+        }}
+      >
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
           <RetroTrophyIcon size={64} />
         </div>
 
         <div style={{ display: 'inline-block', transform: 'rotate(-2deg)', marginBottom: '1rem' }}>
-          <span className="retro-sticker sticker-teal">★ OFFICIAL ARCADE RECORD ★</span>
+          <span
+            className="retro-sticker"
+            style={{
+              backgroundColor: '#DE1A58',
+              color: '#F4B342',
+              borderColor: '#F4B342'
+            }}
+          >
+            ★ OFFICIAL ARCADE RECORD ★
+          </span>
         </div>
 
-        <h1 style={{ fontSize: '2.4rem', fontWeight: 800, color: 'var(--color-plum)', marginBottom: '0.4rem' }}>
+        <h1 style={{ fontSize: '2.4rem', fontWeight: 800, color: '#F4B342', marginBottom: '0.4rem' }}>
           {accuracy >= 80 ? 'HIGH SCORE MASTER!' : accuracy >= 50 ? 'GOOD RUN, PLAYER!' : 'GAME OVER • TRY AGAIN'}
         </h1>
 
-        <p className="font-arcade" style={{ fontSize: '1.4rem', color: 'var(--color-rose)', marginBottom: '1.75rem' }}>
+        <p className="font-arcade" style={{ fontSize: '1.4rem', color: '#DE1A58', marginBottom: '1.75rem' }}>
           CARTRIDGE: {results.quizTitle.toUpperCase()} • MODE: {results.gameMode.toUpperCase()}
         </p>
 
         {/* Stats Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', marginBottom: '1.75rem' }}>
-          <div className="retro-card" style={{ padding: '1rem', backgroundColor: 'var(--card-bg)' }}>
-            <div className="font-arcade" style={{ fontSize: '2.2rem', color: 'var(--color-plum)', fontWeight: 'bold' }}>
+          <div className="retro-card" style={{ padding: '1rem', backgroundColor: '#8F0177', borderColor: '#F4B342', boxShadow: '3px 3px 0px #360185' }}>
+            <div className="font-arcade" style={{ fontSize: '2.2rem', color: '#F4B342', fontWeight: 'bold' }}>
               {results.score}
             </div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-rose)' }}>FINAL SCORE</div>
+            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#F4B342' }}>FINAL SCORE</div>
           </div>
 
-          <div className="retro-card" style={{ padding: '1rem', backgroundColor: 'var(--card-bg)' }}>
-            <div className="font-arcade" style={{ fontSize: '2.2rem', color: 'var(--color-plum)', fontWeight: 'bold' }}>
+          <div className="retro-card" style={{ padding: '1rem', backgroundColor: '#8F0177', borderColor: '#F4B342', boxShadow: '3px 3px 0px #360185' }}>
+            <div className="font-arcade" style={{ fontSize: '2.2rem', color: '#F4B342', fontWeight: 'bold' }}>
               {accuracy}%
             </div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-rose)' }}>ACCURACY</div>
+            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#F4B342' }}>ACCURACY</div>
           </div>
 
-          <div className="retro-card" style={{ padding: '1rem', backgroundColor: 'var(--card-bg)' }}>
-            <div className="font-arcade" style={{ fontSize: '2.2rem', color: 'var(--color-plum)', fontWeight: 'bold' }}>
+          <div className="retro-card" style={{ padding: '1rem', backgroundColor: '#8F0177', borderColor: '#F4B342', boxShadow: '3px 3px 0px #360185' }}>
+            <div className="font-arcade" style={{ fontSize: '2.2rem', color: '#F4B342', fontWeight: 'bold' }}>
               {results.maxStreak}x
             </div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-rose)' }}>MAX STREAK</div>
+            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#F4B342' }}>MAX STREAK</div>
           </div>
 
-          <div className="retro-card" style={{ padding: '1rem', backgroundColor: 'var(--card-bg)' }}>
-            <div className="font-arcade" style={{ fontSize: '2.2rem', color: 'var(--color-plum)', fontWeight: 'bold' }}>
+          <div className="retro-card" style={{ padding: '1rem', backgroundColor: '#8F0177', borderColor: '#F4B342', boxShadow: '3px 3px 0px #360185' }}>
+            <div className="font-arcade" style={{ fontSize: '2.2rem', color: '#F4B342', fontWeight: 'bold' }}>
               {results.totalTimeSpent}s
             </div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-rose)' }}>TIME SPENT</div>
+            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#F4B342' }}>TIME SPENT</div>
           </div>
         </div>
 
         {/* MS SQL Save Status Badge */}
         <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
           <span
-            className="retro-sticker sticker-plum"
-            style={{ fontSize: '1rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+            className="retro-sticker"
+            style={{
+              fontSize: '1rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              backgroundColor: '#8F0177',
+              color: '#F4B342',
+              borderColor: '#F4B342'
+            }}
           >
             <RetroFloppyIcon size={20} />
             <span>{savedToDb ? 'RECORD COMMITTED TO MS SQL SERVER' : 'RECORD CACHED IN LOCAL LEADERBOARD'}</span>
@@ -164,22 +192,31 @@ export default function ResultsPage() {
 
         {/* Navigation Action Buttons */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-          <a href={`/quiz/${results.quizId}?mode=${results.gameMode}&tag=${encodeURIComponent(results.gamerTag)}`} className="retro-btn retro-btn-plum">
+          <a href={`/quiz/${results.quizId}?mode=${results.gameMode}&tag=${encodeURIComponent(results.gamerTag)}`} className="retro-btn retro-btn-gold">
             ↺ Play Again
           </a>
-          <a href="/leaderboard" className="retro-btn retro-btn-teal">
+          <a href="/leaderboard" className="retro-btn retro-btn-crimson">
             🏆 Global Leaderboard
           </a>
-          <a href="/" className="retro-btn retro-btn-cream">
+          <a href="/" className="retro-btn retro-btn-magenta">
             🏠 Main Arcade
           </a>
         </div>
       </div>
 
       {/* Question Review Section */}
-      <div className="retro-card" style={{ padding: '2rem 1.75rem' }}>
+      <div
+        className="retro-card"
+        style={{
+          padding: '2rem 1.75rem',
+          backgroundColor: '#360185',
+          borderColor: '#8F0177',
+          boxShadow: '6px 6px 0px #DE1A58',
+          color: '#F4B342'
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-          <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--color-plum)' }}>
+          <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#F4B342' }}>
             CARTRIDGE REVIEW &amp; LOG
           </h2>
 
@@ -187,24 +224,42 @@ export default function ResultsPage() {
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button
               type="button"
-              className={`retro-btn ${filter === 'all' ? 'retro-btn-plum' : 'retro-btn-cream'}`}
-              style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem' }}
+              className="retro-btn"
+              style={{
+                padding: '0.35rem 0.75rem',
+                fontSize: '0.85rem',
+                backgroundColor: filter === 'all' ? '#F4B342' : '#8F0177',
+                color: filter === 'all' ? '#360185' : '#F4B342',
+                borderColor: '#F4B342'
+              }}
               onClick={() => setFilter('all')}
             >
               All ({results.answersLog.length})
             </button>
             <button
               type="button"
-              className={`retro-btn ${filter === 'correct' ? 'retro-btn-teal' : 'retro-btn-cream'}`}
-              style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem' }}
+              className="retro-btn"
+              style={{
+                padding: '0.35rem 0.75rem',
+                fontSize: '0.85rem',
+                backgroundColor: filter === 'correct' ? '#F4B342' : '#8F0177',
+                color: filter === 'correct' ? '#360185' : '#F4B342',
+                borderColor: '#F4B342'
+              }}
               onClick={() => setFilter('correct')}
             >
               Correct ({correctCount})
             </button>
             <button
               type="button"
-              className={`retro-btn ${filter === 'incorrect' ? 'retro-btn-rose' : 'retro-btn-cream'}`}
-              style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem' }}
+              className="retro-btn"
+              style={{
+                padding: '0.35rem 0.75rem',
+                fontSize: '0.85rem',
+                backgroundColor: filter === 'incorrect' ? '#DE1A58' : '#8F0177',
+                color: '#F4B342',
+                borderColor: '#F4B342'
+              }}
               onClick={() => setFilter('incorrect')}
             >
               Missed ({incorrectCount})
@@ -213,7 +268,7 @@ export default function ResultsPage() {
         </div>
 
         {filteredLog.length === 0 ? (
-          <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>
+          <p style={{ textAlign: 'center', color: '#F4B342', opacity: 0.8, padding: '2rem' }}>
             No questions in this filter.
           </p>
         ) : (
@@ -222,15 +277,16 @@ export default function ResultsPage() {
               <div
                 key={idx}
                 style={{
-                  border: '2.5px solid var(--border-main)',
+                  border: '2.5px solid #F4B342',
                   borderRadius: '6px',
                   padding: '1.25rem',
-                  backgroundColor: item.isCorrect ? '#f2fcf9' : '#fff5f7',
-                  borderLeft: `6px solid ${item.isCorrect ? 'var(--color-teal)' : 'var(--color-rose)'}`
+                  backgroundColor: '#8F0177',
+                  borderLeft: `6px solid ${item.isCorrect ? '#F4B342' : '#DE1A58'}`,
+                  color: '#F4B342'
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                  <div style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--color-plum)' }}>
+                  <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#F4B342' }}>
                     {idx + 1}. {item.questionText}
                   </div>
                   <span
@@ -238,8 +294,9 @@ export default function ResultsPage() {
                     style={{
                       fontSize: '0.85rem',
                       padding: '0.15rem 0.45rem',
-                      backgroundColor: item.isCorrect ? 'var(--color-teal)' : 'var(--color-rose)',
-                      color: item.isCorrect ? '#0d382f' : '#fff'
+                      backgroundColor: item.isCorrect ? '#F4B342' : '#DE1A58',
+                      color: item.isCorrect ? '#360185' : '#F4B342',
+                      borderColor: '#F4B342'
                     }}
                   >
                     {item.isCorrect ? 'PASS' : 'MISS'}
@@ -254,7 +311,7 @@ export default function ResultsPage() {
 
                 <div style={{ fontSize: '0.92rem', marginBottom: '0.35rem' }}>
                   <span style={{ fontWeight: 700 }}>Your Answer: </span>
-                  <span style={{ color: item.isCorrect ? '#0d5c48' : '#991b1b', fontWeight: 600 }}>
+                  <span style={{ color: item.isCorrect ? '#F4B342' : '#F4B342', fontWeight: 600 }}>
                     {item.selectedIndex >= 0 ? item.options[item.selectedIndex] : '(Timed out / Skipped)'}
                   </span>
                 </div>
@@ -262,13 +319,13 @@ export default function ResultsPage() {
                 {!item.isCorrect && (
                   <div style={{ fontSize: '0.92rem', marginBottom: '0.5rem' }}>
                     <span style={{ fontWeight: 700 }}>Correct Answer: </span>
-                    <span style={{ color: '#0d5c48', fontWeight: 600 }}>
+                    <span style={{ color: '#F4B342', fontWeight: 600 }}>
                       {item.options[item.correctIndex]}
                     </span>
                   </div>
                 )}
 
-                <div style={{ marginTop: '0.65rem', padding: '0.65rem', backgroundColor: 'var(--color-cream)', borderRadius: '4px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                <div style={{ marginTop: '0.65rem', padding: '0.65rem', backgroundColor: '#360185', border: '1.5px solid #F4B342', borderRadius: '4px', fontSize: '0.88rem', color: '#F4B342' }}>
                   <strong>Rationale: </strong>{item.explanation}
                 </div>
               </div>
