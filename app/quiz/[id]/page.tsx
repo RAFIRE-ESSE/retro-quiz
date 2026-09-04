@@ -39,40 +39,90 @@ function QuizPlayContent() {
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const setupQuestions = useCallback((rawQuiz: any) => {
+    setQuiz(rawQuiz);
+    const rawQuestions = Array.isArray(rawQuiz.questions) ? rawQuiz.questions : [];
+    if (rawQuestions.length === 0) {
+      setQuestions([]);
+      return;
+    }
+
+    const prepared = [...rawQuestions].sort(() => Math.random() - 0.5).map((q, qIndex) => {
+      const safeOpts = Array.isArray(q.options) && q.options.length >= 2
+        ? q.options
+        : ['Option A', 'Option B', 'Option C', 'Option D'];
+      const rawCorrect = typeof q.correctOption === 'number' ? q.correctOption : 0;
+      const validCorrect = (rawCorrect >= 0 && rawCorrect < safeOpts.length) ? rawCorrect : 0;
+      const correctText = safeOpts[validCorrect];
+      const shuffledOpts = [...safeOpts].sort(() => Math.random() - 0.5);
+      const newCorrectIdx = Math.max(0, shuffledOpts.indexOf(correctText));
+
+      return {
+        id: q.id || qIndex + 1,
+        questionText: q.questionText || `Question #${qIndex + 1}`,
+        codeSnippet: q.codeSnippet || null,
+        options: shuffledOpts,
+        correctOption: newCorrectIdx,
+        explanation: q.explanation || 'Good job!'
+      };
+    });
+
+    setQuestions(prepared);
+    if (gameMode === 'blitz') {
+      setTimeRemaining(60);
+    } else if (gameMode === 'standard' || gameMode === 'survival') {
+      setTimeRemaining(15);
+    }
+  }, [gameMode]);
+
+  const tryLocalFallback = useCallback(() => {
+    try {
+      const localStr = localStorage.getItem('arcade_custom_quizzes');
+      if (localStr) {
+        const localQuizzes: any[] = JSON.parse(localStr);
+        const cleanTarget = decodeURIComponent(quizId).toLowerCase();
+        const found = localQuizzes.find((q: any) => 
+          String(q.id).toLowerCase() === cleanTarget ||
+          (q.slug && q.slug.toLowerCase() === cleanTarget) ||
+          (q.slug && q.slug.toLowerCase().replace(/[^a-z0-9]+/g, '-') === cleanTarget.replace(/[^a-z0-9]+/g, '-')) ||
+          (q.title && q.title.toLowerCase() === cleanTarget)
+        );
+        if (found) {
+          setupQuestions(found);
+          setLoading(false);
+          return true;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load quiz from localStorage:', e);
+    }
+    return false;
+  }, [quizId, setupQuestions]);
+
   // Fetch Quiz Data
   useEffect(() => {
     if (!quizId) return;
 
     fetch(`/api/quizzes/${quizId}`)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
       .then(data => {
         if (data?.quiz) {
-          setQuiz(data.quiz);
-          const shuffled = [...data.quiz.questions].sort(() => Math.random() - 0.5).map(q => {
-            const correctText = q.options[q.correctOption];
-            const shuffledOpts = [...q.options].sort(() => Math.random() - 0.5);
-            const newCorrectIdx = shuffledOpts.indexOf(correctText);
-            return {
-              ...q,
-              options: shuffledOpts,
-              correctOption: newCorrectIdx
-            };
-          });
-          setQuestions(shuffled);
-
-          if (gameMode === 'blitz') {
-            setTimeRemaining(60);
-          } else if (gameMode === 'standard' || gameMode === 'survival') {
-            setTimeRemaining(15);
-          }
+          setupQuestions(data.quiz);
+          setLoading(false);
+        } else {
+          const ok = tryLocalFallback();
+          if (!ok) setLoading(false);
         }
-        setLoading(false);
       })
       .catch(err => {
-        console.error('Failed to load quiz:', err);
-        setLoading(false);
+        console.warn('Backend fetch failed, attempting local fallback:', err);
+        const ok = tryLocalFallback();
+        if (!ok) setLoading(false);
       });
-  }, [quizId, gameMode]);
+  }, [quizId, gameMode, setupQuestions, tryLocalFallback]);
 
   // Finish Quiz and Redirect to Results
   const finishQuiz = useCallback((reason = 'completed') => {
@@ -247,10 +297,56 @@ function QuizPlayContent() {
 
   if (!quiz || questions.length === 0) {
     return (
-      <div className="retro-card" style={{ padding: '3rem', textAlign: 'center' }}>
-        <h2 style={{ color: 'var(--color-plum)', marginBottom: '1rem' }}>Cartridge Error</h2>
-        <p style={{ marginBottom: '1.5rem' }}>Could not load questions for this quiz.</p>
-        <a href="/" className="retro-btn retro-btn-plum">Return to Arcade</a>
+      <div
+        className="retro-card"
+        style={{
+          padding: '3rem 2rem',
+          textAlign: 'center',
+          backgroundColor: '#360185',
+          borderColor: '#8F0177',
+          boxShadow: '6px 6px 0px #DE1A58',
+          maxWidth: '520px',
+          margin: '2rem auto'
+        }}
+      >
+        <div style={{ display: 'inline-block', transform: 'rotate(-2deg)', marginBottom: '1rem' }}>
+          <span
+            className="retro-sticker"
+            style={{
+              backgroundColor: '#DE1A58',
+              color: '#F4B342',
+              borderColor: '#F4B342',
+              fontSize: '0.95rem'
+            }}
+          >
+            ★ CARTRIDGE NOT DETECTED ★
+          </span>
+        </div>
+
+        <h2
+          className="font-arcade"
+          style={{
+            fontSize: '2.2rem',
+            color: '#F4B342',
+            letterSpacing: '0.04em',
+            marginBottom: '1rem'
+          }}
+        >
+          CARTRIDGE ERROR
+        </h2>
+
+        <p style={{ color: '#F4B342', opacity: 0.9, fontSize: '1.05rem', marginBottom: '2rem' }}>
+          Could not load trivia questions for this cartridge. It may have been unetched or removed.
+        </p>
+
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+          <a href="/" className="retro-btn retro-btn-gold">
+            Return to Arcade
+          </a>
+          <a href="/builder" className="retro-btn retro-btn-crimson">
+            Create Cartridge
+          </a>
+        </div>
       </div>
     );
   }

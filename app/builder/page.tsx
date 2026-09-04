@@ -27,6 +27,7 @@ export default function QuizBuilderPage() {
   ]);
   const [saving, setSaving] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [savedQuizSlug, setSavedQuizSlug] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -111,11 +112,22 @@ export default function QuizBuilderPage() {
 
       const data = await res.json();
       if (res.ok && data.success) {
+        const created = data.quiz;
+        // Save to browser localStorage as an ultra-resilient local backup
+        try {
+          const localStr = localStorage.getItem('arcade_custom_quizzes');
+          const existing: any[] = localStr ? JSON.parse(localStr) : [];
+          const filtered = existing.filter((q: any) => q.id !== created.id && q.slug !== created.slug);
+          filtered.unshift(created);
+          localStorage.setItem('arcade_custom_quizzes', JSON.stringify(filtered));
+        } catch (storageErr) {
+          console.warn('LocalStorage save warning:', storageErr);
+        }
+
+        const playTarget = created.slug || created.id;
+        setSavedQuizSlug(String(playTarget));
         retroSound.playFanfare();
-        setStatusMsg({ text: '★ Cartridge successfully etched into MS SQL Server Database! ★', type: 'success' });
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 1500);
+        setStatusMsg({ text: '★ Cartridge successfully etched into Database! Ready to play! ★', type: 'success' });
       } else {
         setStatusMsg({ text: data.error || 'Failed to save cartridge.', type: 'error' });
       }
@@ -227,7 +239,7 @@ export default function QuizBuilderPage() {
         <div
           className="retro-card"
           style={{
-            padding: '1rem',
+            padding: '1.25rem',
             marginBottom: '1.5rem',
             backgroundColor: statusMsg.type === 'success' ? '#8F0177' : '#DE1A58',
             borderColor: '#F4B342',
@@ -236,7 +248,27 @@ export default function QuizBuilderPage() {
             textAlign: 'center'
           }}
         >
-          {statusMsg.text}
+          <div style={{ fontSize: '1.1rem', marginBottom: savedQuizSlug ? '1rem' : '0' }}>
+            {statusMsg.text}
+          </div>
+          {savedQuizSlug && (
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
+              <a
+                href={`/quiz/${savedQuizSlug}?mode=standard&tag=PLAYER_1`}
+                className="retro-btn retro-btn-gold"
+                style={{ padding: '0.6rem 1.4rem', fontSize: '1.05rem' }}
+              >
+                PLAY THIS CARTRIDGE NOW ▶
+              </a>
+              <a
+                href="/"
+                className="retro-btn retro-btn-plum"
+                style={{ padding: '0.6rem 1.2rem', fontSize: '1rem' }}
+              >
+                Return to Arcade
+              </a>
+            </div>
+          )}
         </div>
       )}
 

@@ -1,9 +1,11 @@
 /**
  * Microsoft SQL Server Database Manager & Resilient Hybrid Layer
  * Connects to MS SQL / Azure SQL via 'mssql' package.
- * Seamlessly falls back to memory store if credentials are not configured or offline.
+ * Seamlessly falls back to persistent local store if credentials are not configured or offline.
  */
 import sql from 'mssql';
+import fs from 'fs';
+import path from 'path';
 import { INITIAL_QUIZZES, INITIAL_LEADERBOARD, Quiz, Question, ScoreRecord } from './seedData';
 
 export interface DbStatus {
@@ -16,10 +18,81 @@ export interface DbStatus {
   totalScores: number;
 }
 
-// In-Memory Storage Fallback (persists in Node runtime memory)
+const DATA_DIR = path.join(process.cwd(), 'data');
+const QUIZZES_FILE = path.join(DATA_DIR, 'custom_quizzes.json');
+const SCORES_FILE = path.join(DATA_DIR, 'custom_scores.json');
+
+// Resilient In-Memory & Local Disk Storage Fallback
 class MemoryStore {
-  quizzes: Quiz[] = JSON.parse(JSON.stringify(INITIAL_QUIZZES));
-  scores: ScoreRecord[] = JSON.parse(JSON.stringify(INITIAL_LEADERBOARD));
+  quizzes: Quiz[] = [];
+  scores: ScoreRecord[] = [];
+
+  constructor() {
+    this.loadFromDisk();
+  }
+
+  loadFromDisk() {
+    this.quizzes = JSON.parse(JSON.stringify(INITIAL_QUIZZES));
+    this.scores = JSON.parse(JSON.stringify(INITIAL_LEADERBOARD));
+
+    try {
+      if (fs.existsSync(QUIZZES_FILE)) {
+        const fileData = fs.readFileSync(QUIZZES_FILE, 'utf-8');
+        const customQuizzes: Quiz[] = JSON.parse(fileData);
+        if (Array.isArray(customQuizzes)) {
+          for (const cq of customQuizzes) {
+            if (!this.quizzes.some(q => q.id === cq.id || (q.slug && q.slug === cq.slug))) {
+              this.quizzes.unshift(cq);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Error loading custom quizzes from disk:', e);
+    }
+
+    try {
+      if (fs.existsSync(SCORES_FILE)) {
+        const fileData = fs.readFileSync(SCORES_FILE, 'utf-8');
+        const customScores: ScoreRecord[] = JSON.parse(fileData);
+        if (Array.isArray(customScores)) {
+          for (const cs of customScores) {
+            if (!this.scores.some(s => s.id === cs.id)) {
+              this.scores.unshift(cs);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Error loading custom scores from disk:', e);
+    }
+  }
+
+  saveCustomQuizzesToDisk() {
+    try {
+      if (!fs.existsSync(DATA_DIR)) {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
+      }
+      const initialSlugs = new Set(INITIAL_QUIZZES.map(q => q.slug));
+      const customOnly = this.quizzes.filter(q => !initialSlugs.has(q.slug));
+      fs.writeFileSync(QUIZZES_FILE, JSON.stringify(customOnly, null, 2), 'utf-8');
+    } catch (e) {
+      console.error('Failed to persist custom quizzes to disk:', e);
+    }
+  }
+
+  saveCustomScoresToDisk() {
+    try {
+      if (!fs.existsSync(DATA_DIR)) {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
+      }
+      const initialIds = new Set(INITIAL_LEADERBOARD.map(s => s.id));
+      const customOnly = this.scores.filter(s => !initialIds.has(s.id));
+      fs.writeFileSync(SCORES_FILE, JSON.stringify(customOnly, null, 2), 'utf-8');
+    } catch (e) {
+      console.error('Failed to persist custom scores to disk:', e);
+    }
+  }
 
   getQuizzes() {
     return this.quizzes.map(q => ({
@@ -35,13 +108,31 @@ class MemoryStore {
   }
 
   getQuiz(idOrSlug: string | number) {
-    const isNum = !isNaN(Number(idOrSlug));
-    return this.quizzes.find(q => isNum ? q.id === Number(idOrSlug) : q.slug === idOrSlug);
+    const raw = String(idOrSlug).trim();
+    const clean = decodeURIComponent(raw).toLowerCase();
+    const asNum = Number(raw);
+
+    return this.quizzes.find(q => {
+      // 1. Direct numeric match
+      if (!isNaN(asNum) && q.id === asNum) return true;
+      // 2. String ID match
+      if (String(q.id).toLowerCase() === clean) return true;
+      // 3. Direct slug match
+      if (q.slug && q.slug.toLowerCase() === clean) return true;
+      // 4. Normalized slug match
+      const normalizedQuizSlug = (q.slug || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const normalizedInput = clean.replace(/[^a-z0-9]+/g, '-');
+      if (normalizedQuizSlug && normalizedQuizSlug === normalizedInput) return true;
+      // 5. Title match fallback
+      if (q.title && q.title.toLowerCase() === clean) return true;
+      return false;
+    });
   }
 
   createQuiz(data: { title: string; description: string; category: string; icon?: string; questions: Omit<Question, 'id'>[] }) {
-    const newId = this.quizzes.length + 1;
-    const slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `quiz-${newId}`;
+    const newId = Date.now();
+    const cleanTitle = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const slug = cleanTitle ? `${cleanTitle}-${newId.toString().slice(-4)}` : `cartridge-${newId}`;
     
     const newQuiz: Quiz = {
       id: newId,
@@ -49,19 +140,20 @@ class MemoryStore {
       title: data.title,
       description: data.description,
       category: data.category || 'custom',
-      icon: data.icon || '✨',
+      icon: data.icon || '🕹️',
       difficulty: 'medium',
       questions: data.questions.map((q, idx) => ({
         id: newId * 100 + idx + 1,
         questionText: q.questionText,
         codeSnippet: q.codeSnippet || null,
         options: q.options,
-        correctOption: q.correctOption,
-        explanation: q.explanation
+        correctOption: typeof q.correctOption === 'number' ? q.correctOption : 0,
+        explanation: q.explanation || 'Good job!'
       }))
     };
 
     this.quizzes.unshift(newQuiz);
+    this.saveCustomQuizzesToDisk();
     return newQuiz;
   }
 
@@ -76,11 +168,17 @@ class MemoryStore {
       playedAt: new Date().toISOString()
     };
     this.scores.unshift(newRecord);
+    this.saveCustomScoresToDisk();
     return newRecord;
   }
 }
 
-const memoryStore = new MemoryStore();
+// Preserve single instance across Next.js dev server hot-reloads
+const globalStore = globalThis as unknown as { _retroQuizMemoryStore?: MemoryStore };
+if (!globalStore._retroQuizMemoryStore) {
+  globalStore._retroQuizMemoryStore = new MemoryStore();
+}
+const memoryStore = globalStore._retroQuizMemoryStore;
 
 // MSSQL Connection Configuration
 const mssqlConfig: sql.config = {

@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1788539624880,
+    "slug": "retro-sonic-trivia-4880",
+    "title": "Retro Sonic Trivia",
+    "description": "Genesis era speed tests",
+    "category": "retro-tech",
+    "icon": "🦔",
+    "difficulty": "medium",
+    "questions": [
+      {
+        "id": 178853962488001,
+        "questionText": "What year was the Sega Genesis released in North America?",
+        "codeSnippet": null,
+        "options": [
+          "1989",
+          "1991",
+          "1985",
+          "1993"
+        ],
+        "correctOption": 0,
+        "explanation": "The Genesis launched in North America in August 1989."
+      }
+    ]
+  }
+]

@@ -39,13 +39,57 @@ export default function HomePage() {
     fetch('/api/quizzes')
       .then(res => res.json())
       .then(data => {
-        if (data?.quizzes) {
-          setQuizzes(data.quizzes);
+        let list: QuizSummary[] = data?.quizzes || [];
+        // Merge with locally stored cartridges if any
+        try {
+          const localStr = localStorage.getItem('arcade_custom_quizzes');
+          if (localStr) {
+            const localList = JSON.parse(localStr);
+            if (Array.isArray(localList)) {
+              for (const lq of localList) {
+                if (!list.some(q => String(q.id) === String(lq.id) || (q.slug && q.slug === lq.slug))) {
+                  list.unshift({
+                    id: lq.id,
+                    slug: lq.slug,
+                    title: lq.title,
+                    description: lq.description,
+                    category: lq.category,
+                    icon: lq.icon,
+                    difficulty: lq.difficulty || 'medium',
+                    questionCount: lq.questions?.length || lq.questionCount || 1
+                  });
+                }
+              }
+            }
+          }
+        } catch {
+          // Ignore
         }
+        setQuizzes(list);
         setLoading(false);
       })
       .catch(err => {
         console.error('Failed to load quizzes:', err);
+        try {
+          const localStr = localStorage.getItem('arcade_custom_quizzes');
+          if (localStr) {
+            const localList = JSON.parse(localStr);
+            if (Array.isArray(localList)) {
+              setQuizzes(localList.map((lq: any) => ({
+                id: lq.id,
+                slug: lq.slug,
+                title: lq.title,
+                description: lq.description,
+                category: lq.category,
+                icon: lq.icon,
+                difficulty: lq.difficulty || 'medium',
+                questionCount: lq.questions?.length || 1
+              })));
+            }
+          }
+        } catch {
+          // Ignore
+        }
         setLoading(false);
       });
   }, []);
