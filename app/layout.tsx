@@ -20,6 +20,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     // Clear any previous CRT scanlines overlay to prevent color darkening
     localStorage.removeItem('retro_crt');
     document.body.classList.remove('crt-active');
+
+    // Force runtime anti-dimming and anti-inversion on document elements
+    try {
+      document.documentElement.style.setProperty('color-scheme', 'only light', 'important');
+      document.documentElement.style.setProperty('forced-color-adjust', 'none', 'important');
+      document.documentElement.style.setProperty('filter', 'none', 'important');
+      document.body.style.setProperty('color-scheme', 'only light', 'important');
+      document.body.style.setProperty('forced-color-adjust', 'none', 'important');
+      document.body.style.setProperty('filter', 'none', 'important');
+    } catch {
+      // Ignore
+    }
   }, []);
 
   const handleToggleSound = () => {
@@ -28,17 +40,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   };
 
   return (
-    <html lang="en">
+    <html lang="en" style={{ colorScheme: 'only light' }}>
       <head>
         <title>RETRO QUIZ ARCADE — 80s/90s Vintage Edition</title>
         <meta name="description" content="A nostalgic 80s & 90s retro-vintage quiz website powered by Next.js and Microsoft SQL Server." />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         {/* Strict Light-Only Enforcement across all browsers & OS engines */}
-        <meta name="color-scheme" content="light only" />
+        <meta name="color-scheme" content="only light" />
         <meta name="supported-color-schemes" content="light" />
         <meta name="theme-color" content="#F4B342" />
+        {/* Opt out of third-party Dark Reader extension auto-dimming */}
+        <meta name="darkreader-lock" content="true" />
+        {/* Disable mobile browser night mode alterations */}
+        <meta name="nightmode" content="disable" />
       </head>
-      <body>
+      <body style={{ colorScheme: 'only light' }}>
         <RetroTransitionProvider>
           <div className="arcade-container">
             {/* Header Bar - Strict 4-color styling: #360185 bg, #8F0177 border, #F4B342 text, #DE1A58 accent */}

@@ -10,9 +10,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=VT323&display=swap');
 
 :root {
-  /* Prevent browser forced-dark mode overrides */
-  color-scheme: light only !important;
+  /* Prevent browser forced-dark mode and auto-dimming overrides */
+  color-scheme: only light !important;
   forced-color-adjust: none !important;
+  -webkit-forced-color-adjust: none !important;
+  filter: none !important;
+  -webkit-filter: none !important;
 
   /* Master 4 Colors */
   --c-indigo: #360185;
@@ -51,16 +54,23 @@
 }
 
 html, body {
-  color-scheme: light only !important;
+  color-scheme: only light !important;
   forced-color-adjust: none !important;
+  -webkit-forced-color-adjust: none !important;
+  filter: none !important;
+  -webkit-filter: none !important;
   -webkit-text-size-adjust: 100%;
 }
 
 @media (prefers-color-scheme: dark) {
   :root, html, body {
-    color-scheme: light only !important;
+    color-scheme: only light !important;
+    forced-color-adjust: none !important;
+    -webkit-forced-color-adjust: none !important;
     background-color: #F4B342 !important;
     color: #360185 !important;
+    filter: none !important;
+    -webkit-filter: none !important;
   }
 }
 
@@ -72,17 +82,17 @@ html, body {
 
 body {
   font-family: var(--font-heading);
-  background-color: #F4B342;
+  background-color: #F4B342 !important;
   color: #360185;
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
   line-height: 1.5;
 
-  /* Retro halftone dot texture using exclusively #8F0177 and #360185 */
+  /* Retro halftone dot texture on pure #F4B342 base */
   background-image: 
-    radial-gradient(#8F0177 1px, transparent 1px),
-    radial-gradient(#360185 1px, #F4B342 1px);
+    radial-gradient(circle, #8F0177 1.2px, transparent 1.2px),
+    radial-gradient(circle, #360185 1.2px, transparent 1.2px);
   background-size: 24px 24px;
   background-position: 0 0, 12px 12px;
 }
