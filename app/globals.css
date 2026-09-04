@@ -1,0 +1,240 @@
+/* =====================================================================
+   Retro Vintage Quiz - Global Stylesheet
+   Color Palette:
+     - #934761 (Deep Vintage Plum / Bordeaux)
+     - #AD5C71 (Muted Rose / Mauve)
+     - #72BAA9 (Retro Teal / Sage Mint)
+     - #D5E7B5 (Pistachio / Vintage Cream)
+   ===================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=VT323&display=swap');
+
+:root {
+  --color-plum: #934761;
+  --color-rose: #AD5C71;
+  --color-teal: #72BAA9;
+  --color-cream: #D5E7B5;
+
+  /* Theme mappings */
+  --bg-page: #D5E7B5;
+  --card-bg: #f7fbe9;
+  --text-primary: #3b1422;
+  --text-secondary: #632e3e;
+  --text-muted: #8a5062;
+  --border-main: #934761;
+  --shadow-color: #934761;
+
+  --font-heading: 'Space Grotesk', -apple-system, sans-serif;
+  --font-retro: 'VT323', monospace;
+  
+  --shadow-retro: 4px 4px 0px var(--shadow-color);
+  --shadow-retro-lg: 6px 6px 0px var(--shadow-color);
+  --shadow-retro-sm: 2px 2px 0px var(--shadow-color);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-heading);
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  line-height: 1.5;
+
+  /* Subtle vintage paper/grain texture */
+  background-image: 
+    radial-gradient(var(--color-rose) 0.75px, transparent 0.75px),
+    radial-gradient(var(--color-plum) 0.75px, var(--bg-page) 0.75px);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
+  background-opacity: 0.15;
+}
+
+/* CRT Scanlines Layer (Toggled via body.crt-active) */
+body.crt-active::after {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+  background-size: 100% 4px;
+  z-index: 999;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Container */
+.arcade-container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+
+/* Retro Chunky Cards */
+.retro-card {
+  background-color: var(--card-bg);
+  border: 3.5px solid var(--border-main);
+  border-radius: 8px;
+  box-shadow: var(--shadow-retro);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+}
+
+.retro-card-interactive:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px var(--shadow-color);
+}
+
+/* Retro Buttons */
+.retro-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.4rem;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  border: 3px solid var(--border-main);
+  border-radius: 6px;
+  box-shadow: var(--shadow-retro);
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  user-select: none;
+}
+
+.retro-btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0px var(--shadow-color);
+}
+
+.retro-btn-plum {
+  background-color: var(--color-plum);
+  color: #fff;
+}
+.retro-btn-plum:hover {
+  background-color: #803d54;
+}
+
+.retro-btn-teal {
+  background-color: var(--color-teal);
+  color: #16362e;
+}
+.retro-btn-teal:hover {
+  background-color: #61a696;
+}
+
+.retro-btn-rose {
+  background-color: var(--color-rose);
+  color: #fff;
+}
+.retro-btn-rose:hover {
+  background-color: #9c4f63;
+}
+
+.retro-btn-cream {
+  background-color: var(--color-cream);
+  color: var(--color-plum);
+}
+.retro-btn-cream:hover {
+  background-color: #c5d9a1;
+}
+
+/* Sticker Tags */
+.retro-sticker {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  font-family: var(--font-retro);
+  font-size: 1.25rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: bold;
+  border: 2px solid var(--border-main);
+  border-radius: 4px;
+  box-shadow: var(--shadow-retro-sm);
+}
+
+.sticker-plum {
+  background-color: var(--color-plum);
+  color: var(--color-cream);
+}
+
+.sticker-teal {
+  background-color: var(--color-teal);
+  color: #102d25;
+}
+
+.sticker-rose {
+  background-color: var(--color-rose);
+  color: #fff;
+}
+
+.sticker-cream {
+  background-color: var(--color-cream);
+  color: var(--color-plum);
+}
+
+/* Arcade Typography */
+.font-arcade {
+  font-family: var(--font-retro);
+  letter-spacing: 0.04em;
+}
+
+/* Code Snippet Box */
+.retro-code-box {
+  background-color: #210d15;
+  color: #72BAA9;
+  border: 2.5px solid var(--border-main);
+  border-radius: 6px;
+  padding: 1rem;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.95rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  margin: 1rem 0;
+  box-shadow: inset 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+/* Progress bar retro */
+.retro-progress-track {
+  height: 14px;
+  background-color: #ebd7be;
+  border: 2.5px solid var(--border-main);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.retro-progress-fill {
+  height: 100%;
+  background-color: var(--color-teal);
+  border-right: 2px solid var(--border-main);
+  transition: width 0.3s ease;
+}
+
+/* Animation keyframes */
+@keyframes arcadePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+.animate-pulse-retro {
+  animation: arcadePulse 1.2s infinite;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.animate-shake {
+  animation: shake 0.35s ease;
+}
